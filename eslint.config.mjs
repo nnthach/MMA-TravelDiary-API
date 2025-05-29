@@ -22,18 +22,18 @@ export default [
     plugins: {},
     rules: {
       // Common
-      "no-console": 1,
+      quotes: "off",
+      "no-console": 0,
       "no-extra-boolean-cast": 0,
       "no-lonely-if": 1,
-      "no-unused-vars": 1,
+      "no-unused-vars": 0,
       "no-trailing-spaces": 1,
       "no-multi-spaces": 1,
       "no-multiple-empty-lines": 1,
       "space-before-blocks": ["error", "always"],
       "object-curly-spacing": [1, "always"],
       indent: ["warn", 2],
-      semi: [1, "never"],
-      quotes: ["error", "single"],
+      semi: [0, "never"],
       "array-bracket-spacing": 1,
       "linebreak-style": 0,
       "no-unexpected-multiline": "warn",
@@ -44,10 +44,3 @@ export default [
     },
   },
 ];
-
-// parserOptions: {
-//   ecmaVersion: "latest",
-//   sourceType: "module",
-//   requireConfigFile: false,
-//   allowImportExportEverywhere: true,
-// },

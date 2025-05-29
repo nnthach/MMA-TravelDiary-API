@@ -15,8 +15,10 @@
   "description": "",
   "dependencies": {
     "@babel/runtime": "^7.27.3",
+    "async-exit-hook": "^2.0.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "mongodb": "^6.16.0",
     "mongoose": "^8.15.1"
   },
   "devDependencies": {
