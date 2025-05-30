@@ -16,8 +16,6 @@ const createUser = async (req, res, next) => {
   });
 
   try {
-    console.log("Validating user data:", req.body);
-
     // abortEarly: cho no return full validate
     await correcCondition.validateAsync(req.body, { abortEarly: false });
     next();

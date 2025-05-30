@@ -1,10 +1,8 @@
 /* eslint-disable no-useless-catch */
-import ApiError from "~/utils/ApiError";
+import { userModel } from "~/models/userModel";
 import { slugify } from "~/utils/formatters";
 
 const createNew = async (reqBody) => {
-  console.log("Request body in service:", reqBody);
-
   try {
     // Handle logic data received
     const newUser = {
@@ -12,8 +10,13 @@ const createNew = async (reqBody) => {
       slug: slugify(reqBody.name),
     };
 
+    // Call model
+    const createdUser = await userModel.createUser(newUser);
+
+    const findUser = await userModel.findUserById(createdUser.insertedId);
+
     // return data to controller
-    return newUser;
+    return findUser;
   } catch (error) {
     throw error;
   }
