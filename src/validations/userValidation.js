@@ -12,6 +12,7 @@ const createUser = async (req, res, next) => {
     }),
     password: Joi.string().min(6).max(20).required().strict(),
     email: Joi.string().email().required(),
+    name: Joi.string().min(3).max(50).required().strict(),
   });
 
   try {
