@@ -24,7 +24,11 @@ const getUserById = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const updatedUser = await userService.update(req.body);
+    const { id, ...data } = req.body;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing user ID" });
+    }
+    const updatedUser = await userService.update(id, data);
     res.status(StatusCodes.OK).json(updatedUser);
   } catch (error) {
     next(error);
@@ -33,12 +37,17 @@ const updateUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   try {
-    await userService.delete(req.body);
+    const { id } = req.body;
+    if (!id) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing user ID" });
+    }
+    await userService.delete(id);
     res.status(StatusCodes.OK).json({ message: "User deleted" });
   } catch (error) {
     next(error);
   }
 };
+
 
 export const userController = {
   // getAllUsers,

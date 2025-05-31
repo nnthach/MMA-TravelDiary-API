@@ -34,12 +34,28 @@ const getById = async (id) => {
     throw error;
   }
 };
+const update = async (id, data) => {
+  try {
+    // Có thể xử lý data ở đây nếu cần
+    return await userModel.updateUserById(id, data);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const deleteUser = async (id) => {
+  try {
+    return await userModel.deleteUserById(id);
+  } catch (error) {
+    throw error;
+  }
+};
 
 export const userService = {
   createNew,
   getById,
-  // update,
-  // delete: deleteUser,
+  update,
+  delete: deleteUser,
 };
 
 // Handle logic data received
