@@ -3,7 +3,6 @@ import { userModel } from "~/models/userModel.js";
 import { slugify } from "~/utils/formatters.js";
 
 const createNew = async (reqBody) => {
-
   try {
     // Handle logic data received
     const newUser = {
@@ -22,9 +21,23 @@ const createNew = async (reqBody) => {
   }
 };
 
+const getById = async (id) => {
+  console.log('controler user id')
+  try {
+    // Call model
+    const findUser = await userModel.findUserById(id);
+
+    // Return the full user data from DB
+    return findUser;
+  } catch (error) {
+    console.log('service error',error)
+    throw error;
+  }
+};
+
 export const userService = {
   createNew,
-  // getById,
+  getById,
   // update,
   // delete: deleteUser,
 };

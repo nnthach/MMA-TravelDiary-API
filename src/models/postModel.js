@@ -2,6 +2,7 @@
 
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
+import { ObjectId } from "mongodb";
 
 const POST_COLLECTION_NAME = "posts";
 // Define the schema for the user collection

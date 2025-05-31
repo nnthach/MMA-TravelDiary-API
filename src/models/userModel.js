@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
+import { ObjectId } from "mongodb";
 
 const USER_COLLECTION_NAME = "users";
 // Define the schema for the user collection
@@ -35,10 +36,11 @@ const createUser = async (data) => {
 };
 
 const findUserById = async (id) => {
+  console.log('model user id')
   try {
     const foundUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)
-      .findOne({ _id: id });
+      .findOne({ _id: new ObjectId(id) });
 
     return foundUser;
   } catch (error) {

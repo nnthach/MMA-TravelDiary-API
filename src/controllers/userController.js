@@ -21,10 +21,12 @@ const createUser = async (req, res, next) => {
 };
 
 const getUserById = async (req, res, next) => {
+  console.log("controler user id");
   try {
     const user = await userService.getById(req.params.id);
     res.status(StatusCodes.OK).json(user);
   } catch (error) {
+    console.log("controller error", error);
     next(error);
   }
 };
