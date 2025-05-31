@@ -12,6 +12,14 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   slug: Joi.string().optional(),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
+  postDetails: Joi.array().items(
+    Joi.object({
+      date: Joi.date().required(),
+      location: Joi.string().max(100).required(),
+      note: Joi.string().max(1000),
+      images: Joi.array().items(Joi.string()).default([])
+    })
+  ).default([]),
 });
 
 // Validate data before creating a new user
@@ -63,10 +71,66 @@ const getAllPost = async () => {
   }
 };
 
+const updatePost = async(id, updateData) => {
+  try {
+    const updatePost = await GET_DB()
+    .collection(POST_COLLECTION_NAME)
+    .findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          ...updateData,
+          updateData: Date.now(),
+        },
+      },
+      {returnDocument: "after"}
+    );
+    return updatePost;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const deletePost = async(id) => {
+  try {
+    const result = await GET_DB()
+    .collection(POST_COLLECTION_NAME)
+    .deleteOne({_id: new ObjectId(id)});
+
+    return result.deletedCount === 1;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const postDetail = async(postId, detail) => {
+  try {
+    const detailWithDate = {
+      ...detail,
+      date: new Date(detail.date)
+    };
+
+    const result = await GET_DB()
+    .collection(POST_COLLECTION_NAME)
+    .findOneAndUpdate(
+      {_id: new ObjectId(postId)},
+      { $push: {postDetails: detailWithDate}, $set: {updatedAt: Date.now()}},
+      { returnDocument: "after"}
+    );
+
+    return result.value;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
 export const postModel = {
   POST_COLLECTION_NAME,
   POST_COLLECTION_SCHEMA,
   createPost,
   findPostById,
   getAllPost,
+  updatePost,
+  deletePost,
+  postDetail,
 };
