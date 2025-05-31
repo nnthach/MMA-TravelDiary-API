@@ -11,6 +11,9 @@ Router.route("/")
   })
   .post(userValidation.createUser, userController.createUser);
 
-Router.route("/:id").get(userController.getUserById);
+Router.route("/:id")
+  .get(userController.getUserById)
+  .put(userController.updateUser)
+  .delete(userController.deleteUser);
 
 export const userRoutes = Router;
