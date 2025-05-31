@@ -1,58 +1,86 @@
-// Define collection (name and schema)
+import mongoose from 'mongoose';
 
-import Joi from "joi";
-import { GET_DB } from "~/config/mongodb";
-
-const USER_COLLECTION_NAME = "users";
-// Define the schema for the user collection
-const USER_COLLECTION_SCHEMA = Joi.object({
-  username: Joi.string().min(6).max(20).required(),
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).max(20).required(),
-  slug: Joi.string().optional(),
-  createdAt: Joi.date().timestamp("javascript").default(Date.now()),
-  updatedAt: Joi.date().timestamp("javascript").default(null),
+// 1. Định nghĩa schema và model
+const UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    minlength: 6,
+    maxlength: 20,
+    trim: true
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true,
+    match: /^\S+@\S+\.\S+$/
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+    maxlength: 100
+  },
+  slug: {
+    type: String,
+    default: null
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: null
+  }
 });
 
-// Validate data before creating a new user
-const validateBeforeCreate = async (data) => {
-  return await USER_COLLECTION_SCHEMA.validateAsync(data, {
-    abortEarly: false,
-  });
+// Tạo model Mongoose
+const User = mongoose.model('User', UserSchema);
+
+// 2. Các hàm thao tác DB dùng Mongoose
+const getAllUsers = async () => {
+  return await User.find({});
 };
 
 const createUser = async (data) => {
-  try {
-    const validData = await validateBeforeCreate(data);
-
-    const createdUser = await GET_DB()
-      .collection(USER_COLLECTION_NAME)
-      .insertOne(validData);
-
-    return createdUser;
-  } catch (error) {
-    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
-    throw new Error(error);
-  }
+  const newUser = new User(data);
+  return await newUser.save();
 };
 
-const findUserById = async (id) => {
-  try {
-    const foundUser = await GET_DB()
-      .collection(USER_COLLECTION_NAME)
-      .findOne({ _id: id });
+const getUserById = async (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid user id');
+  const user = await User.findById(id);
+  if (!user) throw new Error('User not found');
+  return user;
+};
 
-    return foundUser;
-  } catch (error) {
-    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
-    throw new Error(error);
-  }
+const updateUser = async (id, updateData) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid user id');
+  const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+  if (!user) throw new Error('User not found');
+  return user;
+};
+
+const deleteUser = async (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) throw new Error('Invalid user id');
+  const result = await User.findByIdAndDelete(id);
+  if (!result) throw new Error('User not found');
+  return true;
 };
 
 export const userModel = {
-  USER_COLLECTION_NAME,
-  USER_COLLECTION_SCHEMA,
+  getAllUsers,
   createUser,
-  findUserById,
+  getUserById,
+  updateUser,
+  deleteUser,
 };
