@@ -3,7 +3,7 @@
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
 
-const POST_COLLECTION_NAME = "post";
+const POST_COLLECTION_NAME = "posts";
 // Define the schema for the user collection
 const POST_COLLECTION_SCHEMA = Joi.object({
   title: Joi.string().min(6).max(50).required(),
