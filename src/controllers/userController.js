@@ -12,7 +12,6 @@ const createUser = async (req, res, next) => {
 };
 
 const getUserById = async (req, res, next) => {
-  console.log("controler user id");
   try {
     const user = await userService.getById(req.params.id);
     res.status(StatusCodes.OK).json(user);
@@ -26,7 +25,9 @@ const updateUser = async (req, res, next) => {
   try {
     const { id, ...data } = req.body;
     if (!id) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing user ID" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Missing user ID" });
     }
     const updatedUser = await userService.update(id, data);
     res.status(StatusCodes.OK).json(updatedUser);
@@ -39,15 +40,16 @@ const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.body;
     if (!id) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing user ID" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Missing user ID" });
     }
-    await userService.delete(id);
+    await userService.deleteUser(id);
     res.status(StatusCodes.OK).json({ message: "User deleted" });
   } catch (error) {
     next(error);
   }
 };
-
 
 export const userController = {
   // getAllUsers,

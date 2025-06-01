@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 // Validate ObjectId với Joi
 const validateObjectId = (value, helpers) => {
   if (!ObjectId.isValid(value)) {
-    return helpers.error("any.invalid");  // Trả về lỗi nếu không hợp lệ
+    return helpers.error("any.invalid"); // Trả về lỗi nếu không hợp lệ
   }
   return value;
 };
@@ -34,7 +34,9 @@ const USER_UPDATE_SCHEMA = Joi.object({
 
 // Validate dữ liệu trước khi tạo mới
 const validateBeforeCreate = async (data) => {
-  return await USER_COLLECTION_SCHEMA.validateAsync(data, { abortEarly: false });
+  return await USER_COLLECTION_SCHEMA.validateAsync(data, {
+    abortEarly: false,
+  });
 };
 
 // Validate dữ liệu trước khi update
@@ -45,14 +47,12 @@ const validateBeforeUpdate = async (data) => {
 // Create user
 const createUser = async (data) => {
   try {
-    console.log("createUser data:", data);  // Debug data nhận vào
     const validData = await validateBeforeCreate(data);
     const createdUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)
       .insertOne(validData);
     return createdUser;
   } catch (error) {
-    console.error("createUser error:", error);
     throw new Error(error);
   }
 };
@@ -60,12 +60,9 @@ const createUser = async (data) => {
 // Read user by ID
 const findUserById = async (id) => {
   try {
-    // Validate id với Joi trước khi tiếp tục
-    const validId = await Joi.string().custom(validateObjectId, "validate ObjectId").validateAsync(id);
-    
     const foundUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)
-      .findOne({ _id: new ObjectId(validId) });
+      .findOne({ _id: new ObjectId(id) });
     return foundUser;
   } catch (error) {
     throw new Error(error);
@@ -88,7 +85,9 @@ const findUserByFilter = async (filter) => {
 const updateUserById = async (id, data) => {
   try {
     // Validate id với Joi trước khi tiếp tục
-    const validId = await Joi.string().custom(validateObjectId, "validate ObjectId").validateAsync(id);
+    const validId = await Joi.string()
+      .custom(validateObjectId, "validate ObjectId")
+      .validateAsync(id);
 
     const validData = await validateBeforeUpdate(data);
     // Tự động cập nhật updatedAt nếu chưa có
@@ -98,10 +97,7 @@ const updateUserById = async (id, data) => {
 
     const result = await GET_DB()
       .collection(USER_COLLECTION_NAME)
-      .updateOne(
-        { _id: new ObjectId(validId) },
-        { $set: validData }
-      );
+      .updateOne({ _id: new ObjectId(validId) }, { $set: validData });
 
     return result;
   } catch (error) {
@@ -112,12 +108,9 @@ const updateUserById = async (id, data) => {
 // Delete user by ID
 const deleteUserById = async (id) => {
   try {
-    // Validate id với Joi trước khi tiếp tục
-    const validId = await Joi.string().custom(validateObjectId, "validate ObjectId").validateAsync(id);
-
     const result = await GET_DB()
       .collection(USER_COLLECTION_NAME)
-      .deleteOne({ _id: new ObjectId(validId) });
+      .deleteOne({ _id: new ObjectId(id) });
     return result;
   } catch (error) {
     throw new Error(error);

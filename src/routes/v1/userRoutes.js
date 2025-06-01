@@ -9,11 +9,10 @@ Router.route("/")
   .get((req, res) => {
     res.status(StatusCodes.OK).json({ message: "User API GET OK" });
   })
-  .post(userValidation.createUser, userController.createUser);
-
-Router.route("/:id")
-  .get(userController.getUserById)
+  .post(userValidation.createUser, userController.createUser)
   .put(userController.updateUser)
   .delete(userController.deleteUser);
+
+Router.route("/:id").get(userController.getUserById);
 
 export const userRoutes = Router;
