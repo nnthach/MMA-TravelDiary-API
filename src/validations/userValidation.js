@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import Joi from "joi";
 import ApiError from "~/utils/ApiError";
 
-const createUser = async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   const correcCondition = Joi.object({
     // strict kiểm tra nghiêm ngặt về datatype
     username: Joi.string().min(6).max(20).required().strict().messages({
@@ -12,7 +12,13 @@ const createUser = async (req, res, next) => {
     }),
     password: Joi.string().min(6).max(20).required().strict(),
     email: Joi.string().email().required(),
-    name: Joi.string().min(3).max(50).required().strict(),
+    confirm_password: Joi.string()
+      .valid(Joi.ref("password"))
+      .required()
+      .messages({
+        "any.only": "Confirm password does not match the password.",
+        "any.required": "Confirm password is required.",
+      }),
   });
 
   try {
@@ -30,5 +36,5 @@ const createUser = async (req, res, next) => {
 };
 
 export const userValidation = {
-  createUser,
+  registerUser,
 };

@@ -1,11 +1,21 @@
 import { StatusCodes } from "http-status-codes";
 import { userService } from "~/services/userService";
 
-const createUser = async (req, res, next) => {
+const registerUser = async (req, res, next) => {
   try {
-    const createdUser = await userService.createNew(req.body);
+    const registerUser = await userService.registerUser(req.body);
 
-    res.status(StatusCodes.CREATED).json(createdUser);
+    res.status(StatusCodes.CREATED).json(registerUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const loginUser = async (req, res, next) => {
+  try {
+    const loginUser = await userService.loginUser(req.body);
+
+    res.status(StatusCodes.OK).json(loginUser);
   } catch (error) {
     next(error);
   }
@@ -53,8 +63,9 @@ const deleteUser = async (req, res, next) => {
 
 export const userController = {
   // getAllUsers,
-  createUser,
+  registerUser,
   getUserById,
   updateUser,
   deleteUser,
+  loginUser,
 };

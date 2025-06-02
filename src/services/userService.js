@@ -1,21 +1,71 @@
 /* eslint-disable no-useless-catch */
+import { StatusCodes } from "http-status-codes";
 import { userModel } from "~/models/userModel.js";
-import { slugify } from "~/utils/formatters.js";
+import ApiError from "~/utils/ApiError";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { env } from "~/config/environment";
+import Joi from "joi";
 
-const createNew = async (reqBody) => {
+const registerUser = async (reqBody) => {
   try {
-    // Handle logic data received
-    const newUser = {
-      ...reqBody,
-      slug: slugify(reqBody.name),
-    };
+    // handle logic before send to model
+    const isExistedEmail = await userModel.findUserByFilter({
+      email: reqBody.email,
+    });
+    console.log("isExistedEmail", isExistedEmail);
+    if (isExistedEmail) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Email is existed");
+    }
+
+    const isExistedUsername = await userModel.findUserByFilter({
+      username: reqBody.username,
+    });
+    console.log("isExistedUsername", isExistedUsername);
+    if (isExistedUsername) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Username is existed");
+    }
 
     // Call model
-    const createdUser = await userModel.createUser(newUser);
-    const findUser = await userModel.findUserById(createdUser.insertedId);
+    const registerUser = await userModel.registerUser(reqBody);
+    const findUser = await userModel.findUserById(registerUser.insertedId);
 
     // Return the full user data from DB
     return findUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const loginUser = async (reqBody) => {
+  try {
+    const { account, password } = reqBody;
+    const isEmail = Joi.string().email().validate(account).error === undefined;
+    console.log("isEmail", isEmail);
+
+    const accountData = isEmail ? { email: account } : { username: account };
+
+    // check user
+    const user = await userModel.findUserByFilter(accountData);
+    console.log("tim user login", user);
+    if (!user) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
+    }
+
+    // check password
+    const isMatchPassword = await bcrypt.compare(password, user.password);
+    if (!isMatchPassword) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
+    }
+
+    // All correct
+    if (user && isMatchPassword) {
+      // Call model
+      const loginUser = await userModel.loginUser(user);
+
+      // Return the full user data from DB
+      return loginUser;
+    }
   } catch (error) {
     throw error;
   }
@@ -49,8 +99,9 @@ const deleteUser = async (id) => {
 };
 
 export const userService = {
-  createNew,
+  registerUser,
   getById,
   update,
   deleteUser,
+  loginUser,
 };

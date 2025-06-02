@@ -1,6 +1,11 @@
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
 import { ObjectId } from "mongodb";
+import bcrypt from "bcrypt";
+import ApiError from "~/utils/ApiError";
+import { StatusCodes } from "http-status-codes";
+import jwt from "jsonwebtoken";
+import { env } from "~/config/environment";
 
 // Validate ObjectId với Joi
 const validateObjectId = (value, helpers) => {
@@ -10,15 +15,22 @@ const validateObjectId = (value, helpers) => {
   return value;
 };
 
-const USER_COLLECTION_NAME = "users";
+const saltRounds = 10;
 
+const USER_COLLECTION_NAME = "users";
 // Cập nhật schema để validate ObjectId cho `id`
 const USER_COLLECTION_SCHEMA = Joi.object({
   username: Joi.string().min(6).max(20).required(),
-  name: Joi.string().required(),
+  name: Joi.string(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).max(20).required(),
-  slug: Joi.string().optional(),
+  confirm_password: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Confirm password does not match the password.",
+      "any.required": "Confirm password is required.",
+    }),
   createdAt: Joi.date().default(() => new Date()),
   updatedAt: Joi.date().allow(null).default(null),
 });
@@ -28,7 +40,6 @@ const USER_UPDATE_SCHEMA = Joi.object({
   name: Joi.string().optional(),
   email: Joi.string().email().optional(),
   password: Joi.string().min(6).max(20).optional(),
-  slug: Joi.string().optional(),
   updatedAt: Joi.date().default(() => new Date()),
 }).min(1);
 
@@ -44,17 +55,49 @@ const validateBeforeUpdate = async (data) => {
   return await USER_UPDATE_SCHEMA.validateAsync(data, { abortEarly: false });
 };
 
-// Create user
-const createUser = async (data) => {
+// Register user
+const registerUser = async (data) => {
   try {
     const validData = await validateBeforeCreate(data);
-    const createdUser = await GET_DB()
+
+    const hashPassword = await bcrypt.hash(data.password, saltRounds);
+    validData.password = hashPassword;
+
+    delete validData.confirm_password; // ko dua vao database
+
+    const registerUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)
       .insertOne(validData);
-    return createdUser;
+
+    return registerUser;
   } catch (error) {
     throw new Error(error);
   }
+};
+
+// Login
+const loginUser = async (data) => {
+  // payload: du lieu luu tru trong token
+  const payload = {
+    userId: data._id.toString(),
+    username: data.username,
+  };
+
+  // jwt sercret key lay tren https://www.uuidgenerator.net/
+  const accessToken = jwt.sign(payload, env.JWT_SECRET, {
+    expiresIn: env.JWT_EXPIRE,
+  });
+
+  const refreshToken = jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+    expiresIn: env.JWT_REFRESH_EXPIRE,
+  });
+
+  return {
+    statusCode: StatusCodes.OK,
+    userId: data._id.toString(),
+    accessToken,
+    refreshToken,
+  };
 };
 
 // Read user by ID
@@ -138,10 +181,11 @@ const listUsers = async (filter = {}, options = {}) => {
 export const userModel = {
   USER_COLLECTION_NAME,
   USER_COLLECTION_SCHEMA,
-  createUser,
+  registerUser,
   findUserById,
   findUserByFilter,
   updateUserById,
   deleteUserById,
   listUsers,
+  loginUser,
 };
