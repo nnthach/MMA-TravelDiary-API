@@ -13,6 +13,8 @@ Router.route("/")
   .put(userController.updateUser)
   .delete(userController.deleteUser);
 
+Router.route('/register').post(userValidation.createUser, userController.createUser)
+
 Router.route("/:id").get(userController.getUserById);
 
 export const userRoutes = Router;

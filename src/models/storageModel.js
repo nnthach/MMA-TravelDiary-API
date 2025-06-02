@@ -2,6 +2,7 @@
 
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
+import { ObjectId } from "mongodb";
 
 const STORAGE_COLLECTION_NAME = "storages";
 // Define the schema for the user collection
@@ -27,10 +28,21 @@ const validateBeforeCreate = async (data) => {
 const addPostToStorage = async (data) => {
   try {
     const validData = await validateBeforeCreate(data);
+    const newData = {
+      ...validData,
+      userId: new ObjectId(validData.userId),
+      posts: [
+              {
+                postId: new ObjectId(validData.posts[0].postId)
+              }
+            ]  
+      };
+
+    console.log('new data add', newData)
 
     const createdPost = await GET_DB()
       .collection(STORAGE_COLLECTION_NAME)
-      .insertOne(validData);
+      .insertOne(newData);
 
     return createdPost;
   } catch (error) {
@@ -52,9 +64,23 @@ const findStorageById = async (id) => {
   }
 };
 
+const getAllStorage = async () => {
+  try {
+    const foundStorage = await GET_DB()
+      .collection(STORAGE_COLLECTION_NAME)
+      .find({})
+      .toArray();
+
+    return foundStorage;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const storageModel = {
   STORAGE_COLLECTION_NAME,
   STORAGE_COLLECTION_SCHEMA,
   addPostToStorage,
   findStorageById,
+  getAllStorage,
 };
