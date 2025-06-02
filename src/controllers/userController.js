@@ -33,12 +33,12 @@ const getUserById = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const { id, ...data } = req.body;
+    const { id } = req.params;  // lấy id từ URL param
     if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Missing user ID" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing user ID" });
     }
+    const data = req.body; // dữ liệu update
+
     const updatedUser = await userService.update(id, data);
     res.status(StatusCodes.OK).json(updatedUser);
   } catch (error) {
@@ -46,13 +46,12 @@ const updateUser = async (req, res, next) => {
   }
 };
 
+
 const deleteUser = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params; // lấy id từ URL param
     if (!id) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Missing user ID" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Missing user ID" });
     }
     await userService.deleteUser(id);
     res.status(StatusCodes.OK).json({ message: "User deleted" });
@@ -61,8 +60,38 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+
+const getListUsers = async (req, res, next) => {
+  try {
+    // Nếu cần, có thể lấy filter, pagination từ query params
+    const { limit = 10, skip = 0 } = req.query;
+
+    // gọi service lấy danh sách user với limit và skip
+    const users = await userService.listUsers({}, {
+      limit: parseInt(limit, 10),
+      skip: parseInt(skip, 10),
+    });
+
+    res.status(StatusCodes.OK).json(users);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createUser = async (req, res, next) => {
+  try {
+    const createdUser = await userService.createUser(req.body);
+    res.status(StatusCodes.CREATED).json(createdUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 export const userController = {
-  // getAllUsers,
+  createUser,
+  getListUsers,
   registerUser,
   getUserById,
   updateUser,
