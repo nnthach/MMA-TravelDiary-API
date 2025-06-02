@@ -3,6 +3,8 @@
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
 import { ObjectId } from "mongodb";
+import { StatusCodes } from "http-status-codes";
+import ApiError from "~/utils/ApiError";
 
 const STORAGE_COLLECTION_NAME = "storages";
 // Define the schema for the user collection
@@ -32,21 +34,48 @@ const addPostToStorage = async (data) => {
       ...validData,
       userId: new ObjectId(validData.userId),
       posts: [
-              {
-                postId: new ObjectId(validData.posts[0].postId)
-              }
-            ]  
-      };
+        {
+          postId: new ObjectId(validData.posts[0].postId),
+        },
+      ],
+    };
 
-    console.log('new data add', newData)
+    const userHadStorage = await GET_DB()
+      .collection(STORAGE_COLLECTION_NAME)
+      .findOne({ userId: newData.userId });
+
+    console.log("user had storage", userHadStorage);
+
+    if (userHadStorage) {
+      const result = await GET_DB()
+        .collection(STORAGE_COLLECTION_NAME)
+        .updateOne(
+          { userId: newData.userId },
+          { $addToSet: { posts: { postId: newData.posts[0].postId } } }
+        );
+
+      console.log("Post added to existing storage", result);
+
+      // modified count = 0 => ko gi update
+      if (result.modifiedCount === 0) {
+        throw new ApiError(StatusCodes.CONFLICT, "post already existed");
+      }
+      return {
+        statusCode: StatusCodes.OK,
+        message: "Saved post",
+      };
+    }
 
     const createdPost = await GET_DB()
       .collection(STORAGE_COLLECTION_NAME)
       .insertOne(newData);
+    console.log("crete new", createdPost);
 
-    return createdPost;
+    return {
+      statusCode: StatusCodes.CREATED,
+      createdPost,
+    };
   } catch (error) {
-    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
     throw new Error(error);
   }
 };
@@ -59,7 +88,6 @@ const findStorageById = async (id) => {
 
     return foundStorage;
   } catch (error) {
-    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
     throw new Error(error);
   }
 };

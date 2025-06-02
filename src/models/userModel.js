@@ -31,6 +31,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
       "any.only": "Confirm password does not match the password.",
       "any.required": "Confirm password is required.",
     }),
+  role: Joi.string().default("User"),
   createdAt: Joi.date().default(() => new Date()),
   updatedAt: Joi.date().allow(null).default(null),
 });
