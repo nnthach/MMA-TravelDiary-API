@@ -9,5 +9,5 @@ Router.route("/")
   .get(storageController.getAllStorage)
   .post(storageValidation.addPostToStorage, storageController.addPostToStorage);
 
-// ✅ Sửa tên export nếu đang là `storageRoute`
+// Sửa tên export nếu đang là `storageRoute`
 export const storageRoutes = Router;
