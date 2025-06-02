@@ -4,11 +4,14 @@ import exitHook from "async-exit-hook";
 import { env } from "~/config/environment";
 import { APIs_V1 } from "~/routes/v1";
 import { errorHandlingMiddleware } from "~/middlewares/errorHandleMiddleware";
+import cors from "cors";
 
 const START_SERVER = () => {
   const app = express();
   const hostname = env.APP_HOST;
   const port = env.APP_PORT;
+
+  app.use(cors());
 
   app.use(express.json());
 
