@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { env } from "~/config/environment";
 import Joi from "joi";
+import { GET_DB } from "~/config/mongodb";
 
 const registerUser = async (reqBody) => {
   try {
@@ -71,6 +72,39 @@ const loginUser = async (reqBody) => {
   }
 };
 
+const refreshToken = async (reqBody) => {
+  try {
+    const decoded = await new Promise((resolve, reject) => {
+      jwt.verify(
+        reqBody.refreshToken,
+        env.JWT_REFRESH_SECRET,
+        (err, decoded) => {
+          console.log("err", err), console.log("decoded", decoded);
+
+          if (err) reject(new ApiError(StatusCodes.FORBIDDEN, err.message));
+          else resolve(decoded);
+        }
+      );
+    });
+
+    const payload = {
+      userId: decoded.userId,
+      username: decoded.username,
+    };
+
+    const newAccessToken = jwt.sign(payload, env.JWT_SECRET, {
+      expiresIn: env.JWT_EXPIRE,
+    });
+
+    return {
+      statusCode: StatusCodes.OK,
+      accessToken: newAccessToken,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 const getById = async (id) => {
   try {
     // Call model
@@ -104,4 +138,5 @@ export const userService = {
   update,
   deleteUser,
   loginUser,
+  refreshToken,
 };

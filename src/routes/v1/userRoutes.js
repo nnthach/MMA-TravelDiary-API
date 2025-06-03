@@ -14,6 +14,7 @@ Router.route("/")
 
 Router.route('/register').post(userValidation.registerUser, userController.registerUser)
 Router.route('/login').post(userController.loginUser)
+Router.route('/refresh-token').post(userController.refreshToken)
 
 Router.route("/:id").get(userController.getUserById);
 

@@ -188,5 +188,5 @@ export const userModel = {
   updateUserById,
   deleteUserById,
   listUsers,
-  loginUser,
+  loginUser
 };

@@ -21,6 +21,16 @@ const loginUser = async (req, res, next) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const result = await userService.refreshToken(req.body);
+
+    res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getUserById = async (req, res, next) => {
   try {
     const user = await userService.getById(req.params.id);
@@ -68,4 +78,5 @@ export const userController = {
   updateUser,
   deleteUser,
   loginUser,
+  refreshToken,
 };
