@@ -7,11 +7,6 @@ const Router = express.Router();
 
 Router.route("/")
   .get(userController.getListUsers)
-  // .post(userController.createUser)  
-
-
-// Router.route("/register").post(userValidation.registerUser, userController.registerUser);
-// Router.route("/login").post(userController.loginUser);
 
 Router.route('/register').post(userValidation.registerUser, userController.registerUser)
 Router.route('/login').post(userController.loginUser)

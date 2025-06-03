@@ -7,20 +7,18 @@ import { ObjectId } from "mongodb";
 const POST_COLLECTION_NAME = "posts";
 // Define the schema for the user collection
 const POST_COLLECTION_SCHEMA = Joi.object({
+  userId: Joi.string().required(),
+  username: Joi.string().required(),
   title: Joi.string().min(6).max(50).required(),
   content: Joi.string().max(1000).required().strict(),
   images: Joi.array().items(Joi.string()).default([]),
   slug: Joi.string().optional(),
+  location: Joi.string(),
+  city: Joi.string(),
+  country: Joi.string(),
+  public: Joi.boolean().default(false),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
-  postDetails: Joi.array().items(
-    Joi.object({
-      date: Joi.date().required(),
-      location: Joi.string().max(100).required(),
-      note: Joi.string().max(1000),
-      images: Joi.array().items(Joi.string()).default([])
-    })
-  ).default([]),
 });
 
 // Validate data before creating a new user
@@ -72,31 +70,31 @@ const getAllPost = async () => {
   }
 };
 
-const updatePost = async(id, updateData) => {
+const updatePost = async (id, updateData) => {
   try {
     const updatePost = await GET_DB()
-    .collection(POST_COLLECTION_NAME)
-    .findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...updateData,
-          updateData: Date.now(),
+      .collection(POST_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            ...updateData,
+            updateData: Date.now(),
+          },
         },
-      },
-      {returnDocument: "after"}
-    );
+        { returnDocument: "after" }
+      );
     return updatePost;
   } catch (error) {
     throw new Error(error);
   }
 };
 
-const deletePost = async(id) => {
+const deletePost = async (id) => {
   try {
     const result = await GET_DB()
-    .collection(POST_COLLECTION_NAME)
-    .deleteOne({_id: new ObjectId(id)});
+      .collection(POST_COLLECTION_NAME)
+      .deleteOne({ _id: new ObjectId(id) });
 
     return result.deletedCount === 1;
   } catch (error) {
@@ -104,26 +102,29 @@ const deletePost = async(id) => {
   }
 };
 
-const postDetail = async(postId, detail) => {
+const postDetail = async (postId, detail) => {
   try {
     const detailWithDate = {
       ...detail,
-      date: new Date(detail.date)
+      date: new Date(detail.date),
     };
 
     const result = await GET_DB()
-    .collection(POST_COLLECTION_NAME)
-    .findOneAndUpdate(
-      {_id: new ObjectId(postId)},
-      { $push: {postDetails: detailWithDate}, $set: {updatedAt: Date.now()}},
-      { returnDocument: "after"}
-    );
+      .collection(POST_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(postId) },
+        {
+          $push: { postDetails: detailWithDate },
+          $set: { updatedAt: Date.now() },
+        },
+        { returnDocument: "after" }
+      );
 
     return result.value;
   } catch (error) {
     throw new Error(error);
   }
-}
+};
 
 export const postModel = {
   POST_COLLECTION_NAME,

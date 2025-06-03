@@ -5,6 +5,8 @@ import ApiError from "~/utils/ApiError";
 const createPost = async (req, res, next) => {
   const correcCondition = Joi.object({
     // strict kiểm tra nghiêm ngặt về datatype
+    userId: Joi.string().required(),
+    username: Joi.string().required(),
     title: Joi.string().min(6).max(50).required().strict().messages({
       "string.max": "Title must be at most 50 characters long.",
       "string.min": "Title must be at least 6 characters long.",

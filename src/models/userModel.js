@@ -113,7 +113,7 @@ const findUserById = async (id) => {
   try {
     const foundUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)
-      .findOne({ _id: id });
+      .findOne({ _id: new ObjectId(id) });
 
     return foundUser;
   } catch (error) {
