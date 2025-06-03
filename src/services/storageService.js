@@ -20,8 +20,6 @@ const addPostToStorage = async (reqBody) => {
 };
 
 const getAllStorage = async () => {
-  console.log("storage getall serivce");
-
   try {
     // Call model
     const getAllStorage = await storageModel.getAllStorage();

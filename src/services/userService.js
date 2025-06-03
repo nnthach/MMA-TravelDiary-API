@@ -14,7 +14,6 @@ const registerUser = async (reqBody) => {
     const isExistedEmail = await userModel.findUserByFilter({
       email: reqBody.email,
     });
-    console.log("isExistedEmail", isExistedEmail);
     if (isExistedEmail) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Email is existed");
     }
@@ -22,7 +21,6 @@ const registerUser = async (reqBody) => {
     const isExistedUsername = await userModel.findUserByFilter({
       username: reqBody.username,
     });
-    console.log("isExistedUsername", isExistedUsername);
     if (isExistedUsername) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Username is existed");
     }
@@ -42,13 +40,11 @@ const loginUser = async (reqBody) => {
   try {
     const { account, password } = reqBody;
     const isEmail = Joi.string().email().validate(account).error === undefined;
-    console.log("isEmail", isEmail);
 
     const accountData = isEmail ? { email: account } : { username: account };
 
     // check user
     const user = await userModel.findUserByFilter(accountData);
-    console.log("tim user login", user);
     if (!user) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
     }
@@ -74,6 +70,16 @@ const loginUser = async (reqBody) => {
 
 const refreshToken = async (reqBody) => {
   try {
+    const isValidRFToken = await userModel.findUserByFilter({
+      refreshToken: reqBody.refreshToken,
+    });
+
+    console.log("isValid token", isValidRFToken);
+
+    if (!isValidRFToken) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid token");
+    }
+
     const decoded = await new Promise((resolve, reject) => {
       jwt.verify(
         reqBody.refreshToken,
@@ -139,27 +145,13 @@ const listUsers = async (filter = {}, options = {}) => {
     throw error;
   }
 };
-const createUser = async (data) => {
-  // kiểm tra dữ liệu, ví dụ email, username tồn tại, ...
-  const existEmail = await userModel.findUserByFilter({ email: data.email });
-  if (existEmail) throw new ApiError(StatusCodes.BAD_REQUEST, "Email đã tồn tại");
-
-  const existUsername = await userModel.findUserByFilter({ username: data.username });
-  if (existUsername) throw new ApiError(StatusCodes.BAD_REQUEST, "Username đã tồn tại");
-
-  // gọi model tạo user
-  const newUser = await userModel.createUser(data);
-  return newUser;
-};
-
 
 export const userService = {
   registerUser,
-  createUser,      // thêm hàm này vào export
   getById,
   update,
   deleteUser,
   loginUser,
   refreshToken,
-  listUsers,  
+  listUsers,
 };

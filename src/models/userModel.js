@@ -32,6 +32,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
       "any.required": "Confirm password is required.",
     }),
   role: Joi.string().default("User"),
+  refreshToken: Joi.string().default(""),
   createdAt: Joi.date().default(() => new Date()),
   updatedAt: Joi.date().allow(null).default(null),
 });
@@ -71,7 +72,8 @@ const registerUser = async (data) => {
 
     return registerUser;
   } catch (error) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+    // throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
+    throw new Error(error);
   }
 };
 
@@ -90,6 +92,14 @@ const loginUser = async (data) => {
     expiresIn: env.JWT_REFRESH_EXPIRE,
   });
 
+  // set rftoken to DB
+  await GET_DB().collection(USER_COLLECTION_NAME).updateOne(
+    { _id: data._id },
+    {
+      $set: { refreshToken },
+    }
+  );
+
   return {
     statusCode: StatusCodes.OK,
     userId: data._id.toString(),
@@ -101,72 +111,15 @@ const loginUser = async (data) => {
 // Read user by ID
 const findUserById = async (id) => {
   try {
-    if (!ObjectId.isValid(id)) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid user ID");
-    }
-
-    // Nếu id là chuỗi hex, tạo ObjectId trực tiếp
-    // Nếu id là số (timestamp), chuyển qua createFromTime
-    let objectId;
-    if (typeof id === 'string') {
-      objectId = new ObjectId(id);
-    } else if (typeof id === 'number') {
-      objectId = ObjectId.createFromTime(id);
-    } else {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid user ID type");
-    }
-
     const foundUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)
-      .findOne({ _id: objectId });
-      
-    if (!foundUser) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
-    }
+      .findOne({ _id: id });
 
     return foundUser;
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
   }
 };
-
-// Tạo user mới (CRUD cho admin)
-const createUser = async (data) => {
-  try {
-    const validData = await validateBeforeCreate(data);
-    validData.password = await bcrypt.hash(validData.password, saltRounds);
-    delete validData.confirm_password;
-
-    if (!validData.createdAt) validData.createdAt = new Date();
-    if (!validData.updatedAt) validData.updatedAt = null;
-
-    const result = await GET_DB()
-      .collection(USER_COLLECTION_NAME)
-      .insertOne(validData);
-
-    console.log("Insert result:", result);
-    console.log("Inserted ID:", result.insertedId);
-    console.log("Type of insertedId:", typeof result.insertedId);
-    console.log("Is ObjectId instance:", result.insertedId instanceof ObjectId);
-
-    // Truy vấn bằng insertedId trực tiếp, không bọc lại nếu đã là ObjectId
-    const newUser = await GET_DB()
-      .collection(USER_COLLECTION_NAME)
-      .findOne({ _id: result.insertedId });
-
-    if (!newUser) {
-      console.error("User not found after insert");
-      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
-    }
-
-    return newUser;
-  } catch (error) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
-  }
-};
-
-
-
 
 // Read user by filter (e.g., email, username)
 const findUserByFilter = async (filter) => {
@@ -175,10 +128,7 @@ const findUserByFilter = async (filter) => {
       .collection(USER_COLLECTION_NAME)
       .findOne(filter);
 
-    if (!user) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
-    }
-
+    // dung co quang error o day
     return user;
   } catch (error) {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
@@ -200,9 +150,9 @@ const updateUserById = async (id, data) => {
     }
 
     let objectId;
-    if (typeof id === 'string') {
+    if (typeof id === "string") {
       objectId = new ObjectId(id);
-    } else if (typeof id === 'number') {
+    } else if (typeof id === "number") {
       objectId = ObjectId.createFromTime(id);
     } else {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid user ID type");
@@ -221,7 +171,6 @@ const updateUserById = async (id, data) => {
     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, error.message);
   }
 };
-
 
 // Delete user by ID
 const deleteUserById = async (id) => {
@@ -274,12 +223,11 @@ const listUsers = async (filter = {}, options = {}) => {
 export const userModel = {
   USER_COLLECTION_NAME,
   USER_COLLECTION_SCHEMA,
-  createUser,
   registerUser,
   findUserById,
   findUserByFilter,
   updateUserById,
   deleteUserById,
   listUsers,
-  loginUser
+  loginUser,
 };

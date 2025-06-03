@@ -7,20 +7,20 @@ const Router = express.Router();
 
 Router.route("/")
   .get(userController.getListUsers)
-  .post(userController.createUser)  
+  // .post(userController.createUser)  
 
 
-Router.route("/register").post(userValidation.registerUser, userController.registerUser);
-Router.route("/login").post(userController.loginUser);
+// Router.route("/register").post(userValidation.registerUser, userController.registerUser);
+// Router.route("/login").post(userController.loginUser);
+
+Router.route('/register').post(userValidation.registerUser, userController.registerUser)
+Router.route('/login').post(userController.loginUser)
+Router.route('/refresh-token').post(userController.refreshToken)
 
 Router.route("/:id")
   .get(userController.getUserById)
   .delete(userController.deleteUser)
   .put(userController.updateUser);  
-
-Router.route('/register').post(userValidation.registerUser, userController.registerUser)
-Router.route('/login').post(userController.loginUser)
-Router.route('/refresh-token').post(userController.refreshToken)
 
 
 

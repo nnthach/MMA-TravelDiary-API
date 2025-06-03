@@ -44,8 +44,6 @@ const addPostToStorage = async (data) => {
       .collection(STORAGE_COLLECTION_NAME)
       .findOne({ userId: newData.userId });
 
-    console.log("user had storage", userHadStorage);
-
     if (userHadStorage) {
       const result = await GET_DB()
         .collection(STORAGE_COLLECTION_NAME)
@@ -53,8 +51,6 @@ const addPostToStorage = async (data) => {
           { userId: newData.userId },
           { $addToSet: { posts: { postId: newData.posts[0].postId } } }
         );
-
-      console.log("Post added to existing storage", result);
 
       // modified count = 0 => ko gi update
       if (result.modifiedCount === 0) {
@@ -69,7 +65,6 @@ const addPostToStorage = async (data) => {
     const createdPost = await GET_DB()
       .collection(STORAGE_COLLECTION_NAME)
       .insertOne(newData);
-    console.log("crete new", createdPost);
 
     return {
       statusCode: StatusCodes.CREATED,
