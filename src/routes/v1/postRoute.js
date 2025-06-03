@@ -11,4 +11,9 @@ Router.route("/")
   .get(postController.getAllPost)
   .post(postValidation.createPost, postController.createPost);
 
+Router.route("/:id")
+  .get(postController.findPostById)
+  .delete(postController.deletePost)
+  .put(postController.updatePost);
+
 export const postRoutes = Router;
