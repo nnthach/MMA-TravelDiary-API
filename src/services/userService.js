@@ -131,12 +131,35 @@ const deleteUser = async (id) => {
     throw error;
   }
 };
+const listUsers = async (filter = {}, options = {}) => {
+  try {
+    const users = await userModel.listUsers(filter, options);
+    return users;
+  } catch (error) {
+    throw error;
+  }
+};
+const createUser = async (data) => {
+  // kiểm tra dữ liệu, ví dụ email, username tồn tại, ...
+  const existEmail = await userModel.findUserByFilter({ email: data.email });
+  if (existEmail) throw new ApiError(StatusCodes.BAD_REQUEST, "Email đã tồn tại");
+
+  const existUsername = await userModel.findUserByFilter({ username: data.username });
+  if (existUsername) throw new ApiError(StatusCodes.BAD_REQUEST, "Username đã tồn tại");
+
+  // gọi model tạo user
+  const newUser = await userModel.createUser(data);
+  return newUser;
+};
+
 
 export const userService = {
   registerUser,
+  createUser,      // thêm hàm này vào export
   getById,
   update,
   deleteUser,
   loginUser,
   refreshToken,
+  listUsers,  
 };

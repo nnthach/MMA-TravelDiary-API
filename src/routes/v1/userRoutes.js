@@ -6,16 +6,22 @@ import { userValidation } from "~/validations/userValidation";
 const Router = express.Router();
 
 Router.route("/")
-  .get((req, res) => {
-    res.status(StatusCodes.OK).json({ message: "User API GET OK" });
-  })
-  .put(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(userController.getListUsers)
+  .post(userController.createUser)  
+
+
+Router.route("/register").post(userValidation.registerUser, userController.registerUser);
+Router.route("/login").post(userController.loginUser);
+
+Router.route("/:id")
+  .get(userController.getUserById)
+  .delete(userController.deleteUser)
+  .put(userController.updateUser);  
 
 Router.route('/register').post(userValidation.registerUser, userController.registerUser)
 Router.route('/login').post(userController.loginUser)
 Router.route('/refresh-token').post(userController.refreshToken)
 
-Router.route("/:id").get(userController.getUserById);
+
 
 export const userRoutes = Router;
