@@ -2,10 +2,10 @@
 import { storageModel } from "~/models/storageModel";
 import { postModel } from "~/models/postModel";
 
-const addPostToStorage = async (id, reqBody) => {
+const addPostToStorage = async (userId, reqBody) => {
   try {
     const payload = {
-      userId: id,
+      userId,
       postIds: [reqBody.postId],
     };
 
@@ -51,7 +51,22 @@ const getStorageOfUser = async (id) => {
   }
 };
 
+const removePostInStorage = async (userId, postId) => {
+  try {
+    const removePostInStorage = await storageModel.removePostInStorage(
+      userId,
+      postId
+    );
+
+    // return data to controller
+    return removePostInStorage;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const storageService = {
   addPostToStorage,
   getStorageOfUser,
+  removePostInStorage,
 };

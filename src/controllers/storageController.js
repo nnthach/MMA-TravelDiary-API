@@ -5,7 +5,7 @@ import { storageService } from "~/services/storageService";
 const addPostToStorage = async (req, res, next) => {
   try {
     const addedPostToStorage = await storageService.addPostToStorage(
-      req.params.id,
+      req.params.userId,
       req.body
     );
 
@@ -31,10 +31,26 @@ const addPostToStorage = async (req, res, next) => {
 };
 
 // (GET)
+const removePostInStorage = async (req, res, next) => {
+  try {
+    const { userId, postId } = req.params;
+    const result = await storageService.removePostInStorage(userId, postId);
+
+    if (result.modifiedCount === 0) {
+      return res.status(404).json({ message: "Post not found in storage." });
+    }
+
+    res.status(StatusCodes.OK).json({ message: "Updated storage" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// (GET)
 const getStorageOfUser = async (req, res, next) => {
   try {
     const getStorageOfUser = await storageService.getStorageOfUser(
-      req.params.id
+      req.params.userId
     );
 
     res.status(StatusCodes.OK).json(getStorageOfUser);
@@ -46,4 +62,5 @@ const getStorageOfUser = async (req, res, next) => {
 export const storageController = {
   addPostToStorage,
   getStorageOfUser,
+  removePostInStorage,
 };

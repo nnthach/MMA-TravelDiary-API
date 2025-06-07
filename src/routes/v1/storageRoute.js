@@ -4,11 +4,13 @@ import { storageValidation } from "~/validations/storageValidation";
 
 const Router = express.Router();
 
-Router.route("/:id")
+Router.route("/:userId")
   .get(storageController.getStorageOfUser)
   .patch(
     storageValidation.addPostToStorage,
     storageController.addPostToStorage
   );
+
+Router.route("/:userId/:postId").delete(storageController.removePostInStorage);
 
 export const storageRoutes = Router;

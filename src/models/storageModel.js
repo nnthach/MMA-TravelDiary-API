@@ -1,4 +1,3 @@
-
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
 import { ObjectId } from "mongodb";
@@ -10,7 +9,7 @@ const STORAGE_COLLECTION_SCHEMA = Joi.object({
   isMultiple: Joi.boolean().default(false),
 });
 
-// Validate data input 
+// Validate data input
 const validateBeforeCreate = async (data) => {
   return await STORAGE_COLLECTION_SCHEMA.validateAsync(data, {
     abortEarly: false,
@@ -52,9 +51,25 @@ const getStorageOfUser = async (id) => {
   }
 };
 
+const removePostInStorage = async (userId, postId) => {
+  try {
+    const result = await GET_DB()
+      .collection(STORAGE_COLLECTION_NAME)
+      .updateOne(
+        { userId: new ObjectId(userId) },
+        { $pull: { postIds: new ObjectId(postId) } }
+      );
+
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const storageModel = {
   STORAGE_COLLECTION_NAME,
   STORAGE_COLLECTION_SCHEMA,
   getStorageOfUser,
   addNewPostToStorage,
+  removePostInStorage,
 };
