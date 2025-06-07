@@ -100,10 +100,25 @@ const getAllStorage = async () => {
   }
 };
 
+const getStorageOfUser = async (id) => {
+  try {
+    const foundStorage = await GET_DB()
+      .collection(STORAGE_COLLECTION_NAME)
+      .findOne({ userId: new ObjectId(id) });
+
+    return foundStorage;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+
+
 export const storageModel = {
   STORAGE_COLLECTION_NAME,
   STORAGE_COLLECTION_SCHEMA,
   addPostToStorage,
   findStorageById,
   getAllStorage,
+  getStorageOfUser,
 };

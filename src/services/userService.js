@@ -64,7 +64,7 @@ const loginUser = async (reqBody) => {
       return loginUser;
     }
   } catch (error) {
-    throw error;
+    throw new ApiError(StatusCodes.UNAUTHORIZED, "Fail to login");
   }
 };
 

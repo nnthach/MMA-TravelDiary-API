@@ -126,6 +126,22 @@ const postDetail = async (postId, detail) => {
   }
 };
 
+const findAllPostInStorage = async (data) => {
+  try {
+    // $in chỉ nhận array ko nhận array object nên phải convert
+    const postListId = data.map((item) => item.postId);
+    console.log("postListId after map", postListId);
+    const foundPostList = await GET_DB()
+      .collection(POST_COLLECTION_NAME)
+      .find({ _id: { $in: postListId } })
+      .toArray();
+
+    return foundPostList;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const postModel = {
   POST_COLLECTION_NAME,
   POST_COLLECTION_SCHEMA,
@@ -135,4 +151,5 @@ export const postModel = {
   updatePost,
   deletePost,
   postDetail,
+  findAllPostInStorage,
 };

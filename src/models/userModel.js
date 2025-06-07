@@ -82,6 +82,7 @@ const loginUser = async (data) => {
   const payload = {
     userId: data._id.toString(),
     username: data.username,
+    role: data.role,
   };
 
   const accessToken = jwt.sign(payload, env.JWT_SECRET, {
@@ -103,6 +104,7 @@ const loginUser = async (data) => {
   return {
     statusCode: StatusCodes.OK,
     userId: data._id.toString(),
+    role: data.role,
     accessToken,
     refreshToken,
   };

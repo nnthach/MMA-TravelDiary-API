@@ -9,4 +9,6 @@ Router.route("/")
   .get(storageController.getAllStorage)
   .post(storageValidation.addPostToStorage, storageController.addPostToStorage);
 
+Router.route('/:id').get(storageController.getStorageOfUser)
+
 export const storageRoutes = Router;
