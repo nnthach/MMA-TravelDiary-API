@@ -1,14 +1,14 @@
 import express from "express";
-import { StatusCodes } from "http-status-codes";
 import { storageController } from "~/controllers/storageController";
 import { storageValidation } from "~/validations/storageValidation";
 
 const Router = express.Router();
 
-Router.route("/")
-  .get(storageController.getAllStorage)
-  .post(storageValidation.addPostToStorage, storageController.addPostToStorage);
-
-Router.route('/:id').get(storageController.getStorageOfUser)
+Router.route("/:id")
+  .get(storageController.getStorageOfUser)
+  .patch(
+    storageValidation.addPostToStorage,
+    storageController.addPostToStorage
+  );
 
 export const storageRoutes = Router;

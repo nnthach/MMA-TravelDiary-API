@@ -5,14 +5,7 @@ import ApiError from "~/utils/ApiError";
 const addPostToStorage = async (req, res, next) => {
   const correcCondition = Joi.object({
     // strict kiểm tra nghiêm ngặt về datatype
-    userId: Joi.string().required().strict(),
-    posts: Joi.array()
-      .items(
-        Joi.object({
-          postId: Joi.string().required(),
-        })
-      )
-      .default([]),
+    postId: Joi.string().required(),
   });
 
   try {

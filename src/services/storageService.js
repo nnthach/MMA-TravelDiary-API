@@ -1,32 +1,30 @@
 /* eslint-disable no-useless-catch */
 import { storageModel } from "~/models/storageModel";
-import { storageRoute } from "~/routes/v1/storageRoute";
-import { ObjectId } from "mongodb";
 import { postModel } from "~/models/postModel";
 
-const addPostToStorage = async (reqBody) => {
+const addPostToStorage = async (id, reqBody) => {
   try {
-    // Call model
-    const addPostToStorage = await storageModel.addPostToStorage(reqBody);
+    const payload = {
+      userId: id,
+      postIds: [reqBody.postId],
+    };
 
-    // const findStorage = await storageModel.findStorageById(
-    //   addPostToStorage.insertedId
-    // );
+    const result = await storageModel.addNewPostToStorage(payload);
 
-    // return data to controller
-    return addPostToStorage;
-  } catch (error) {
-    throw error;
-  }
-};
+    // // Find storage
+    // const exitedStorage = await storageModel.getStorageOfUser(reqBody.userId);
 
-const getAllStorage = async () => {
-  try {
-    // Call model
-    const getAllStorage = await storageModel.getAllStorage();
+    // if (!exitedStorage) {
+    //   const createNewStorage = await storageModel.createNewStorage(payload);
 
-    // return data to controller
-    return getAllStorage;
+    //   return createNewStorage;
+    // } else {
+    //   const addNewPostToStorage = await storageModel.addNewPostToStorage(
+    //     payload
+    //   );
+    //   return addNewPostToStorage;
+    // }
+    return result;
   } catch (error) {
     throw error;
   }
@@ -34,13 +32,17 @@ const getAllStorage = async () => {
 
 const getStorageOfUser = async (id) => {
   try {
-    console.log("service get",id);
-    // Call model
+    // check isExitStorage
     const getStorageOfUser = await storageModel.getStorageOfUser(id);
-    console.log('in service got storage',getStorageOfUser)
-    const postListId = getStorageOfUser?.posts || []
-    console.log('postListId',postListId)
-    const posts = await postModel.findAllPostInStorage(postListId)
+
+    if (!getStorageOfUser) {
+      return [];
+    }
+
+    // get all post in storage
+    const posts = await postModel.findAllPostInStorage(
+      getStorageOfUser.postIds
+    );
 
     // return data to controller
     return posts;
@@ -51,6 +53,5 @@ const getStorageOfUser = async (id) => {
 
 export const storageService = {
   addPostToStorage,
-  getAllStorage,
   getStorageOfUser,
 };
