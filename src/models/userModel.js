@@ -41,7 +41,7 @@ const USER_UPDATE_SCHEMA = Joi.object({
   username: Joi.string().min(6).max(20).optional(),
   name: Joi.string().optional(),
   email: Joi.string().email().optional(),
-  role : Joi.string(),
+  role: Joi.string(),
   password: Joi.string().min(6).max(20).optional(),
   updatedAt: Joi.date().default(() => new Date()),
 }).min(1);
@@ -113,6 +113,7 @@ const loginUser = async (data) => {
 
 // Read user by ID
 const findUserById = async (id) => {
+  console.log("revice id", id);
   try {
     const foundUser = await GET_DB()
       .collection(USER_COLLECTION_NAME)

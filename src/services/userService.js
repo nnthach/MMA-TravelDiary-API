@@ -115,6 +115,9 @@ const getById = async (id) => {
   try {
     // Call model
     const findUser = await userModel.findUserById(id);
+    if (!findUser) {
+      return { message: "Not found" };
+    }
 
     // Return the full user data from DB
     return findUser;
