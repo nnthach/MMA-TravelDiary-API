@@ -47,10 +47,6 @@ const findPostById = async (id) => {
 
 const updatePost = async (id, updateData) => {
   try {
-    if (updateData.title) {
-      updateData.slug = slugify(updateData.title);
-    }
-
     const updatedPost = await postModel.updatePost(id, updateData);
     return updatedPost;
   } catch (error) {

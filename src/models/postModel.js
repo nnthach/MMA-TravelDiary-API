@@ -65,25 +65,27 @@ const getAllPost = async () => {
 
     return getAllPost;
   } catch (error) {
-    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
     throw new Error(error);
   }
 };
 
 const updatePost = async (id, updateData) => {
+  console.log("id post update in model", id);
+  console.log("data post update in model", updateData);
   try {
+    const newUpdateData = {
+      ...updateData,
+      updatedAt: new Date(),
+    };
+
     const updatePost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
       .findOneAndUpdate(
         { _id: new ObjectId(id) },
-        {
-          $set: {
-            ...updateData,
-            updateData: Date.now(),
-          },
-        },
+        { $set: newUpdateData },
         { returnDocument: "after" }
       );
+    console.log("updatedpost in model", updatePost);
     return updatePost;
   } catch (error) {
     throw new Error(error);

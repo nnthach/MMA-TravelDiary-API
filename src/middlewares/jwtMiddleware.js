@@ -9,6 +9,7 @@ const white_lists = [
   { method: "POST", path: "/users/login" },
   { method: "GET", path: "/post" },
   { method: "GET", path: "/post/:id" },
+  { method: "PUT", path: "/post/:id" },
 ]; // danh sach cac api ko can token
 
 const matchers = white_lists.map(({ method, path }) => ({

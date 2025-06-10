@@ -1,5 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 import { postService } from "~/services/postService";
+import { ObjectId } from "mongodb";
 
 const createPost = async (req, res, next) => {
   try {
@@ -27,7 +28,9 @@ const findPostById = async (req, res, next) => {
     const foundPost = await postService.findPostById(postId);
 
     if (!foundPost) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Post not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Post not found" });
     }
 
     res.status(StatusCodes.OK).json(foundPost);
@@ -39,13 +42,19 @@ const findPostById = async (req, res, next) => {
 const updatePost = async (req, res, next) => {
   try {
     const postId = req.params.id;
-    const updatedPost = await postService.updatePost(postId, req.body);
+    console.log("postid need update", postId);
+    console.log("data update post", req.body);
 
-    if (!updatedPost.value) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Post not found or not updated" });
+    const objectId = new ObjectId(postId);
+    const getPostById = await postService.findPostById(objectId);
+    console.log("find post by id", getPostById);
+    if (getPostById.userId != req.body.userId) {
+      res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid user" });
     }
 
-    res.status(StatusCodes.OK).json(updatedPost.value);
+    const updatedPost = await postService.updatePost(postId, req.body);
+
+    res.status(StatusCodes.OK).json(updatedPost);
   } catch (error) {
     next(error);
   }
@@ -57,7 +66,9 @@ const deletePost = async (req, res, next) => {
     const deleted = await postService.deletePost(postId);
 
     if (!deleted) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Post not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Post not found" });
     }
 
     res.status(StatusCodes.NO_CONTENT).send();
@@ -74,7 +85,9 @@ const postDetail = async (req, res, next) => {
     const updatedPost = await postService.postDetail(postId, detail);
 
     if (!updatedPost) {
-      return res.status(StatusCodes.NOT_FOUND).json({ message: "Post not found" });
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Post not found" });
     }
 
     res.status(StatusCodes.OK).json(updatedPost);
