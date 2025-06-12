@@ -96,6 +96,16 @@ const postDetail = async (req, res, next) => {
   }
 };
 
+const getAllPostOfUser = async (req, res, next) => {
+  try {
+    const getAllPostOfUser = await postService.getAllPostOfUser(req.params.id);
+
+    res.status(StatusCodes.OK).json(getAllPostOfUser);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const postController = {
   createPost,
   getAllPost,
@@ -103,4 +113,5 @@ export const postController = {
   updatePost,
   deletePost,
   postDetail,
+  getAllPostOfUser,
 };

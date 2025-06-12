@@ -72,6 +72,15 @@ const postDetail = async (postId, detail) => {
   }
 };
 
+const getAllPostOfUser = async (id) => {
+  try {
+    const getAllPostOfUser = await postModel.getPostByUserId(id);
+    return getAllPostOfUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const postService = {
   createPost,
   getAllPost,
@@ -79,4 +88,5 @@ export const postService = {
   updatePost,
   deletePost,
   postDetail,
+  getAllPostOfUser,
 };

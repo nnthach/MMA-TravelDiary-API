@@ -142,6 +142,19 @@ const findAllPostInStorage = async (data) => {
   }
 };
 
+const getPostByUserId = async (id) => {
+  try {
+    const getAllPost = await GET_DB()
+      .collection(POST_COLLECTION_NAME)
+      .find({ userId: id })
+      .toArray();
+
+    return getAllPost;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const postModel = {
   POST_COLLECTION_NAME,
   POST_COLLECTION_SCHEMA,
@@ -152,4 +165,5 @@ export const postModel = {
   deletePost,
   postDetail,
   findAllPostInStorage,
+  getPostByUserId,
 };
