@@ -16,6 +16,6 @@ Router.route("/:id")
   .delete(postController.deletePost)
   .put(postController.updatePost);
 
-Router.route("/user/:id").get(postController.getAllPostOfUser);
+Router.route("/user/:id").get(postController.getAllPostOfUserAndPublic);
 
 export const postRoutes = Router;
