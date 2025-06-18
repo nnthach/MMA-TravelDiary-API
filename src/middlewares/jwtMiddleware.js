@@ -9,7 +9,6 @@ const white_lists = [
   { method: "POST", path: "/users/login" },
   { method: "GET", path: "/post" },
   { method: "GET", path: "/post/:id" },
-  { method: "PUT", path: "/post/:id" },
 ]; // danh sach cac api ko can token
 
 const matchers = white_lists.map(({ method, path }) => ({
@@ -19,11 +18,12 @@ const matchers = white_lists.map(({ method, path }) => ({
 
 export const jwtMiddleware = (req, res, next) => {
   const method = req.method.toUpperCase();
+  const pathname = new URL(req.originalUrl, `http://${req.headers.host}`).pathname;
 
   if (
     matchers.some(
       ({ method: allowedMethod, matcher }) =>
-        allowedMethod === method && matcher(req.originalUrl)
+        allowedMethod === method && matcher(pathname)
     )
   ) {
     console.log("dont need token");

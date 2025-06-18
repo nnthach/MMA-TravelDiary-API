@@ -13,8 +13,10 @@ const createPost = async (req, res, next) => {
 };
 
 const getAllPost = async (req, res, next) => {
+  console.log("req.query", req.query);
+
   try {
-    const getAllPost = await postService.getAllPost();
+    const getAllPost = await postService.getAllPost(req.query);
 
     res.status(StatusCodes.OK).json(getAllPost);
   } catch (error) {
@@ -99,10 +101,8 @@ const postDetail = async (req, res, next) => {
 const getAllPostOfUserAndPublic = async (req, res, next) => {
   console.log("req.query", req.query);
   try {
-    const getAllPostOfUserAndPublic = await postService.getAllPostOfUserAndPublic(
-      req.params.id,
-      req.query
-    );
+    const getAllPostOfUserAndPublic =
+      await postService.getAllPostOfUserAndPublic(req.params.id, req.query);
 
     res.status(StatusCodes.OK).json(getAllPostOfUserAndPublic);
   } catch (error) {

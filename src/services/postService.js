@@ -23,10 +23,21 @@ const createPost = async (reqBody) => {
   }
 };
 
-const getAllPost = async (reqBody) => {
+const getAllPost = async (query) => {
+  console.log("query serive", query);
   try {
+    const filter = {};
+
+    if (query.public === "true") {
+      // find public true
+      filter.public = true;
+    } else if (query.public === "false") {
+      // find public false
+      filter.public = false;
+    } // do not find public
+
     // Call model
-    const getAllPost = await postModel.getAllPost();
+    const getAllPost = await postModel.getAllPost(filter);
 
     // return data to controller
     return getAllPost;
@@ -83,8 +94,6 @@ const getAllPostOfUserAndPublic = async (id, query) => {
       // find public false
       filter.public = false;
     } // do not find public
-
-    console.log("filter", filter);
 
     const getAllPostOfUser = await postModel.getPostByUserIdAndPublic(filter);
     return getAllPostOfUser;
