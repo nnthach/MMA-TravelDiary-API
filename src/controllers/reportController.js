@@ -4,6 +4,8 @@ const { StatusCodes } = require("http-status-codes");
 
 const sendReport = async (req, res, next) => {
   try {
+  console.log('send report controller')
+
     const sendReport = await reportService.sendReport(req.body);
     res.status(StatusCodes.OK).json(sendReport);
   } catch (error) {

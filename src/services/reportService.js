@@ -5,6 +5,16 @@ import { reportModel } from "~/models/reportModel";
 
 const sendReport = async (reqBody) => {
   try {
+    const { postId, reporterId } = reqBody;
+    const existingReport = await reportModel.findOne({
+      postId,
+      reporterId,
+    });
+
+    if (existingReport) {
+      throw new Error("You have already reported this post.");
+    }
+
     // Call model
     await reportModel.sendReport(reqBody);
 

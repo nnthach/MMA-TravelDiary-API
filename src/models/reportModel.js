@@ -1,6 +1,6 @@
 // Define collection (name and schema)
 
-import Joi from "joi";
+import Joi, { date } from "joi";
 import { GET_DB } from "~/config/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -8,7 +8,7 @@ const REPORT_COLLECTION_NAME = "reports";
 // Define the schema for the user collection
 const REPORT_COLLECTION_SCHEMA = Joi.object({
   postId: Joi.string().required(),
-  // reporterId: Joi.string().required(),
+  reporterId: Joi.string().required(),
   reason: Joi.string().required(),
   description: Joi.string().max(200).required(),
   status: Joi.string().default("pending"),
@@ -31,8 +31,19 @@ const sendReport = async (data) => {
     const sendReport = await GET_DB()
       .collection(REPORT_COLLECTION_NAME)
       .insertOne(validData);
+    console.log("send report modal result", sendReport);
 
     return sendReport;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+const findOne = async (data) => {
+  try {
+    const findOne = await GET_DB()
+      .collection(REPORT_COLLECTION_NAME)
+      .findOne(data);
+    return findOne;
   } catch (error) {
     throw new Error(error);
   }
@@ -42,4 +53,5 @@ export const reportModel = {
   REPORT_COLLECTION_NAME,
   REPORT_COLLECTION_SCHEMA,
   sendReport,
+  findOne,
 };

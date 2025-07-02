@@ -13,12 +13,12 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   content: Joi.string().max(1000).required().strict(),
   images: Joi.array().items(Joi.string()).default([]),
   slug: Joi.string().optional(),
-  location: Joi.string().default(""),
   province: Joi.string().default(""),
   district: Joi.string().default(""),
   ward: Joi.string().default(""),
   country: Joi.string().default("Viet Nam"),
   public: Joi.boolean().default(false),
+  isBanned: Joi.boolean().default(false),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
 });
