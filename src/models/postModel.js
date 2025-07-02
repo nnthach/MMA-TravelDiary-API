@@ -13,13 +13,12 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   content: Joi.string().max(1000).required().strict(),
   images: Joi.array().items(Joi.string()).default([]),
   slug: Joi.string().optional(),
-  location: Joi.string().default(""),
-    province: Joi.string().optional(),  // Added for province
-  district: Joi.string().optional(),  // Added for district
-  ward: Joi.string().optional(),  
-  city: Joi.string().default(""),
-  country: Joi.string().default(""),
+  province: Joi.string().default(""),
+  district: Joi.string().default(""),
+  ward: Joi.string().default(""),
+  country: Joi.string().default("Viet Nam"),
   public: Joi.boolean().default(false),
+  isBanned: Joi.boolean().default(false),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
 });
@@ -32,6 +31,7 @@ const validateBeforeCreate = async (data) => {
 };
 
 const createPost = async (data) => {
+  console.log('data create', data)
   try {
     const validData = await validateBeforeCreate(data);
 
@@ -59,11 +59,12 @@ const findPostById = async (id) => {
   }
 };
 
-const getAllPost = async () => {
+const getAllPost = async (filter) => {
   try {
+    console.log("filer in model", filter);
     const getAllPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .find()
+      .find(filter)
       .toArray();
 
     return getAllPost;
