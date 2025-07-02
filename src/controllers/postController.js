@@ -96,6 +96,20 @@ const postDetail = async (req, res, next) => {
   }
 };
 
+const getAllPostOfUserAndPublic = async (req, res, next) => {
+  console.log("req.query", req.query);
+  try {
+    const getAllPostOfUserAndPublic = await postService.getAllPostOfUserAndPublic(
+      req.params.id,
+      req.query
+    );
+
+    res.status(StatusCodes.OK).json(getAllPostOfUserAndPublic);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const postController = {
   createPost,
   getAllPost,
@@ -103,4 +117,5 @@ export const postController = {
   updatePost,
   deletePost,
   postDetail,
+  getAllPostOfUserAndPublic,
 };

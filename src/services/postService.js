@@ -72,6 +72,27 @@ const postDetail = async (postId, detail) => {
   }
 };
 
+const getAllPostOfUserAndPublic = async (id, query) => {
+  try {
+    const filter = { userId: id };
+
+    if (query.public === "true") {
+      // find public true
+      filter.public = true;
+    } else if (query.public === "false") {
+      // find public false
+      filter.public = false;
+    } // do not find public
+
+    console.log("filter", filter);
+
+    const getAllPostOfUser = await postModel.getPostByUserIdAndPublic(filter);
+    return getAllPostOfUser;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const postService = {
   createPost,
   getAllPost,
@@ -79,4 +100,5 @@ export const postService = {
   updatePost,
   deletePost,
   postDetail,
+  getAllPostOfUserAndPublic,
 };

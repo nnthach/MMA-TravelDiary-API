@@ -1,11 +1,11 @@
+// Define collection (name and schema)
+
 import Joi from "joi";
-import { GET_DB } from "~/config/mongodb";  // Đảm bảo bạn đã cấu hình MongoDB đúng
+import { GET_DB } from "~/config/mongodb";
 import { ObjectId } from "mongodb";
 
-// Define collection (name and schema)
 const POST_COLLECTION_NAME = "posts";
-
-// Define the schema for the post collection
+// Define the schema for the user collection
 const POST_COLLECTION_SCHEMA = Joi.object({
   userId: Joi.string().required(),
   username: Joi.string().required(),
@@ -13,95 +13,88 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   content: Joi.string().max(1000).required().strict(),
   images: Joi.array().items(Joi.string()).default([]),
   slug: Joi.string().optional(),
-  location: Joi.string().optional(),
-  province: Joi.string().optional(),  // Added for province
+  location: Joi.string().default(""),
+    province: Joi.string().optional(),  // Added for province
   district: Joi.string().optional(),  // Added for district
-  ward: Joi.string().optional(),     // Added for ward
-  address: Joi.string().optional(),  // Added for address
-  city: Joi.string().optional(),
-  country: Joi.string().optional(),
+  ward: Joi.string().optional(),  
+  city: Joi.string().default(""),
+  country: Joi.string().default(""),
   public: Joi.boolean().default(false),
-  createdAt: Joi.date().timestamp("javascript").default(Date.now),
+  createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
 });
 
-// Validate data before creating a new post
+// Validate data before creating a new user
 const validateBeforeCreate = async (data) => {
-  try {
-    return await POST_COLLECTION_SCHEMA.validateAsync(data, {
-      abortEarly: false,
-    });
-  } catch (error) {
-    throw new Error(`Validation failed: ${error.message}`);
-  }
+  return await POST_COLLECTION_SCHEMA.validateAsync(data, {
+    abortEarly: false,
+  });
 };
 
-// Create a new post
 const createPost = async (data) => {
   try {
     const validData = await validateBeforeCreate(data);
 
-    // Store the post in the database
     const createdPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
       .insertOne(validData);
 
     return createdPost;
   } catch (error) {
-    throw new Error("Error while creating post: " + error.message);
+    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
+    throw new Error(error);
   }
 };
 
-// Find post by ID
 const findPostById = async (id) => {
   try {
     const foundPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .findOne({ _id: new ObjectId(id) });
+      .findOne({ _id: id });
 
-    return foundPost || null;
+    return foundPost;
   } catch (error) {
-    throw new Error(`Error fetching post by ID: ${error.message}`);
+    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
+    throw new Error(error);
   }
 };
 
-// Get all posts
-const getAllPosts = async () => {
+const getAllPost = async () => {
   try {
-    const posts = await GET_DB()
+    const getAllPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
       .find()
       .toArray();
 
-    return posts;
+    return getAllPost;
   } catch (error) {
-    throw new Error(`Error fetching all posts: ${error.message}`);
+    throw new Error(error);
   }
 };
 
-// Update a post
 const updatePost = async (id, updateData) => {
+  console.log("id post update in model", id);
+  console.log("data post update in model", updateData);
   try {
     const newUpdateData = {
       ...updateData,
       updatedAt: new Date(),
     };
 
-    const updatedPost = await GET_DB()
+    const updatePost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
       .findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: newUpdateData },
         { returnDocument: "after" }
       );
-
-    return updatedPost.value || null;
+    console.log("updatedpost in model", updatePost);
+    return updatePost;
   } catch (error) {
-    throw new Error(`Error updating post: ${error.message}`);
+    throw new Error(error);
   }
 };
 
-// Delete a post
 const deletePost = async (id) => {
   try {
     const result = await GET_DB()
@@ -110,11 +103,10 @@ const deletePost = async (id) => {
 
     return result.deletedCount === 1;
   } catch (error) {
-    throw new Error(`Error deleting post: ${error.message}`);
+    throw new Error(error);
   }
 };
 
-// Add details to a post
 const postDetail = async (postId, detail) => {
   try {
     const detailWithDate = {
@@ -133,23 +125,38 @@ const postDetail = async (postId, detail) => {
         { returnDocument: "after" }
       );
 
-    return result.value || null;
+    return result.value;
   } catch (error) {
-    throw new Error(`Error updating post details: ${error.message}`);
+    throw new Error(error);
   }
 };
 
-// Find multiple posts by their IDs
-const findAllPostInStorage = async (ids) => {
+const findAllPostInStorage = async (data) => {
   try {
+    // $in chỉ nhận array ko nhận array object nên phải convert
     const foundPostList = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .find({ _id: { $in: ids.map((id) => new ObjectId(id)) } })
+      .find({ _id: { $in: data } })
       .toArray();
 
     return foundPostList;
   } catch (error) {
-    throw new Error(`Error fetching posts by IDs: ${error.message}`);
+    throw new Error(error);
+  }
+};
+
+const getPostByUserIdAndPublic = async (filter) => {
+  try {
+    const getAllPost = await GET_DB()
+      .collection(POST_COLLECTION_NAME)
+      .find(filter)
+      .toArray();
+
+    console.log("get all post", getAllPost);
+
+    return getAllPost;
+  } catch (error) {
+    throw new Error(error);
   }
 };
 
@@ -158,9 +165,10 @@ export const postModel = {
   POST_COLLECTION_SCHEMA,
   createPost,
   findPostById,
-  getAllPosts,
+  getAllPost,
   updatePost,
   deletePost,
   postDetail,
   findAllPostInStorage,
+  getPostByUserIdAndPublic,
 };
