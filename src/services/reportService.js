@@ -1,7 +1,9 @@
 /* eslint-disable no-unreachable */
 /* eslint-disable no-useless-catch */
 
+import { postModel } from "~/models/postModel";
 import { reportModel } from "~/models/reportModel";
+import { ObjectId } from "mongodb";
 
 const sendReport = async (reqBody) => {
   try {
@@ -26,6 +28,57 @@ const sendReport = async (reqBody) => {
   }
 };
 
+const getAllReport = async () => {
+  try {
+    // Call model
+    const getAllReport = await reportModel.getAllReport();
+
+    return getAllReport;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getReportDetail = async (id) => {
+  try {
+    // Call model
+    const getReportDetail = await reportModel.getReportDetail(id);
+
+    return getReportDetail;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateReport = async (id, body) => {
+  if (body.action != "accepted" && body.action != "rejected") {
+    throw new Error("Wrong action type");
+  }
+  try {
+    const getReportDetail = await reportModel.getReportDetail(id);
+
+    console.log("get report detail in update service", getReportDetail);
+
+    const isPostAvailable = await postModel.findPostById(
+      new ObjectId(getReportDetail.postId)
+    );
+
+    if (!isPostAvailable) {
+      throw new Error("This post is not exist");
+    }
+
+    // Call model
+    const updateReportResult = await reportModel.updateReport(id, body);
+
+    return updateReportResult;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const reportService = {
   sendReport,
+  getAllReport,
+  updateReport,
+  getReportDetail,
 };
