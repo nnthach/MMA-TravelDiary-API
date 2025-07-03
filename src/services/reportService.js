@@ -28,10 +28,16 @@ const sendReport = async (reqBody) => {
   }
 };
 
-const getAllReport = async () => {
+const getAllReport = async (reqQuery) => {
+  const { status } = reqQuery;
   try {
+    console.log("report get status", status);
+    const query = {};
+    if (status) {
+      query.status = status;
+    }
     // Call model
-    const getAllReport = await reportModel.getAllReport();
+    const getAllReport = await reportModel.getAllReport(query);
 
     return getAllReport;
   } catch (error) {

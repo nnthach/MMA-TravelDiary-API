@@ -49,11 +49,12 @@ const findOne = async (data) => {
   }
 };
 
-const getAllReport = async () => {
+const getAllReport = async (query = {}) => {
   try {
     const getAllReport = await GET_DB()
       .collection(REPORT_COLLECTION_NAME)
       .aggregate([
+        { $match: query },
         {
           $addFields: {
             postId: { $toObjectId: "$postId" }, //convert id to object

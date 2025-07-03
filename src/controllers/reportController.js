@@ -18,7 +18,7 @@ const getAllReport = async (req, res, next) => {
   try {
     console.log("get all report controller");
 
-    const getAllReport = await reportService.getAllReport();
+    const getAllReport = await reportService.getAllReport(req.query);
     res.status(StatusCodes.OK).json(getAllReport);
   } catch (error) {
     console.log(error);
