@@ -17,7 +17,10 @@ const createPost = async (req, res, next) => {
 
   try {
     // abortEarly: cho no return full validate
-    await correcCondition.validateAsync(req.body, { abortEarly: false });
+    await correcCondition.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
     next();
   } catch (error) {
     const errorMessage = new Error(error).message;

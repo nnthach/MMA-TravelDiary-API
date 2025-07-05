@@ -16,7 +16,10 @@ const sendReport = async (req, res, next) => {
     console.log("send report validate body", req.body);
 
     // abortEarly: cho no return full validate
-    await correcCondition.validateAsync(req.body, { abortEarly: false });
+    await correcCondition.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
     next();
   } catch (error) {
     const errorMessage = new Error(error).message;

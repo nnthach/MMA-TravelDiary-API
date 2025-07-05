@@ -4,6 +4,7 @@ import { slugify } from "~/utils/formatters";
 import { ObjectId } from "mongodb";
 
 const createPost = async (reqBody) => {
+  console.log("create post body in service", reqBody);
   try {
     // Handle logic data received
     const newPost = {
@@ -58,6 +59,14 @@ const findPostById = async (id) => {
 
 const updatePost = async (id, updateData) => {
   try {
+    if (updateData.public == true) {
+      const post = await postModel.findPostById(new ObjectId(id));
+
+      if (post.isBanned) {
+        throw new Error("Your post was banned so cannot public");
+      }
+    }
+
     const updatedPost = await postModel.updatePost(id, updateData);
     return updatedPost;
   } catch (error) {
