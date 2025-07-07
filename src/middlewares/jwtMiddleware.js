@@ -7,6 +7,8 @@ const white_lists = [
   { method: "GET", path: "/" },
   { method: "POST", path: "/users/register" },
   { method: "POST", path: "/users/login" },
+  { method: "POST", path: "/users/forgot-password" },
+  { method: "POST", path: "/users/reset-password" },
   { method: "GET", path: "/post" },
   { method: "GET", path: "/post/:id" },
 ]; // danh sach cac api ko can token
@@ -18,7 +20,8 @@ const matchers = white_lists.map(({ method, path }) => ({
 
 export const jwtMiddleware = (req, res, next) => {
   const method = req.method.toUpperCase();
-  const pathname = new URL(req.originalUrl, `http://${req.headers.host}`).pathname;
+  const pathname = new URL(req.originalUrl, `http://${req.headers.host}`)
+    .pathname;
 
   if (
     matchers.some(

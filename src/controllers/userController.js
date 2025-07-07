@@ -92,6 +92,30 @@ const getListUsers = async (req, res, next) => {
   }
 };
 
+const forgotPassword = async (req, res, next) => {
+  try {
+    console.log("email forgot password", req.body.email);
+    const forgotPassword = await userService.forgotPassword(req.body.email);
+
+    res.status(StatusCodes.OK).json({ message: "Check your email..." });
+  } catch (error) {
+    console.log("error forgot password", error);
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    console.log("reset password body", req.body);
+    const resetPassword = await userService.resetPassword(req.body);
+
+    res.status(StatusCodes.OK).json(resetPassword);
+  } catch (error) {
+    console.log("error forgot password", error);
+    next(error);
+  }
+};
+
 export const userController = {
   getListUsers,
   registerUser,
@@ -100,4 +124,6 @@ export const userController = {
   deleteUser,
   loginUser,
   refreshToken,
+  forgotPassword,
+  resetPassword,
 };

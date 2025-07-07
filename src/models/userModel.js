@@ -33,6 +33,8 @@ const USER_COLLECTION_SCHEMA = Joi.object({
     }),
   role: Joi.string().default("User"),
   refreshToken: Joi.string().default(""),
+  otp: Joi.string().default(""),
+  otpExpire: Joi.date().default(null),
   createdAt: Joi.date().default(() => new Date()),
   updatedAt: Joi.date().allow(null).default(null),
 });
@@ -43,6 +45,8 @@ const USER_UPDATE_SCHEMA = Joi.object({
   email: Joi.string().email().optional(),
   role: Joi.string(),
   password: Joi.string().min(6).max(20).optional(),
+  otp: Joi.string().allow(null),
+  otpExpire: Joi.date().allow(null),
   updatedAt: Joi.date().default(() => new Date()),
 }).min(1);
 

@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 import { env } from "~/config/environment";
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
+import nodemailer from "nodemailer";
+import { saveOTPToUser } from "~/utils/createOTP";
 
 const registerUser = async (reqBody) => {
   try {
@@ -45,12 +47,14 @@ const loginUser = async (reqBody) => {
 
     // check user
     const user = await userModel.findUserByFilter(accountData);
+    console.log("user login", user);
     if (!user) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
     }
 
     // check password
     const isMatchPassword = await bcrypt.compare(password, user.password);
+    console.log("is match password", isMatchPassword);
     if (!isMatchPassword) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
     }
@@ -149,6 +153,67 @@ const listUsers = async (filter = {}, options = {}) => {
   }
 };
 
+const forgotPassword = async (email) => {
+  try {
+    const user = await userModel.findUserByFilter({ email });
+    if (!user) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid email");
+    }
+
+    const otp = await saveOTPToUser(user._id);
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: env.EMAIL_APP_NAME,
+        pass: env.EMAIL_APP_PASSWORD,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: '"Travel Diary" <nguyenngocthach2301@gmail.com>',
+      to: email,
+      subject: "Reset Password",
+      text: "OTP", // plain‑text body
+      html: `<p>Your OTP is: <b>${otp}</b>. It will expire in 5 minutes</p>`, // HTML body
+    });
+    return info;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const resetPassword = async (body) => {
+  try {
+    const { email, password, otp } = body;
+    const user = await userModel.findUserByFilter({ email });
+    if (!user) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid email");
+    }
+
+    if (user.otp !== otp) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid OTP");
+    }
+
+    const currentTime = new Date();
+    if (!user.otpExpire || currentTime > user.otpExpire) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "OTP was expired");
+    }
+
+    await userModel.updateUserById(user._id.toString(), {
+      password,
+      otp: null,
+      otpExpire: null,
+    });
+
+    return { message: "Password reset successfully" };
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const userService = {
   registerUser,
   getById,
@@ -157,4 +222,6 @@ export const userService = {
   loginUser,
   refreshToken,
   listUsers,
+  forgotPassword,
+  resetPassword,
 };

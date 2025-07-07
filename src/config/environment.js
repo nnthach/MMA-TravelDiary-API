@@ -12,4 +12,7 @@ export const env = {
   JWT_EXPIRE: process.env.JWT_EXPIRE,
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
   JWT_REFRESH_EXPIRE: process.env.JWT_REFRESH_EXPIRE,
+
+  EMAIL_APP_PASSWORD: process.env.EMAIL_APP_PASSWORD,
+  EMAIL_APP_NAME: process.env.EMAIL_APP_NAME,
 };
