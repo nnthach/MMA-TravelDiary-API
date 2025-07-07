@@ -90,6 +90,7 @@ const updateComment = async (id, body) => {
 const deleteComment = async (id) => {
   try {
     const comment = await findCommentById(new ObjectId(id));
+    console.log("comment found to delete", comment);
 
     const deleteComment = await GET_DB()
       .collection(COMMENT_COLLECTION_NAME)
@@ -98,7 +99,7 @@ const deleteComment = async (id) => {
     await GET_DB()
       .collection("posts")
       .updateOne(
-        { _id: new ObjectId(comment.postId) },
+        { _id: comment.post },
         { $pull: { comments: { _id: new ObjectId(id) } } }
       );
 
