@@ -19,6 +19,7 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   country: Joi.string().default("Viet Nam"),
   public: Joi.boolean().default(false),
   isBanned: Joi.boolean().default(false),
+  comments: Joi.array().items(Joi.object().unknown(true)).default([]),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
 });
@@ -27,11 +28,12 @@ const POST_COLLECTION_SCHEMA = Joi.object({
 const validateBeforeCreate = async (data) => {
   return await POST_COLLECTION_SCHEMA.validateAsync(data, {
     abortEarly: false,
+    allowUnknown: true,
   });
 };
 
 const createPost = async (data) => {
-  console.log('data create', data)
+  console.log("data create", data);
   try {
     const validData = await validateBeforeCreate(data);
 
@@ -161,6 +163,36 @@ const getPostByUserIdAndPublic = async (filter) => {
   }
 };
 
+const updatePostComment = async (id, body) => {
+  try {
+    const updateComment = await GET_DB()
+      .collection(POST_COLLECTION_NAME)
+      .updateOne(
+        {
+          _id: new ObjectId(body.postId),
+        },
+        {
+          $set: {
+            "comments.$[elem].content": body.content,
+            "comments.$[elem].updatedAt": new Date(),
+          },
+        },
+        {
+          arrayFilters: [
+            {
+              "elem._id": new ObjectId(id),
+            },
+          ],
+        }
+      );
+    console.log("update comment model", updateComment);
+
+    return updateComment;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export const postModel = {
   POST_COLLECTION_NAME,
   POST_COLLECTION_SCHEMA,
@@ -172,4 +204,5 @@ export const postModel = {
   postDetail,
   findAllPostInStorage,
   getPostByUserIdAndPublic,
+  updatePostComment,
 };
