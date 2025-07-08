@@ -22,6 +22,7 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   comments: Joi.array().items(Joi.object().unknown(true)).default([]),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
+    likes: Joi.array().items(Joi.string()).default([])
 });
 
 // Validate data before creating a new user
@@ -50,13 +51,12 @@ const createPost = async (data) => {
 
 const findPostById = async (id) => {
   try {
+    const objectId = typeof id === "string" ? new ObjectId(id) : id;
     const foundPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .findOne({ _id: id });
-
+      .findOne({ _id: objectId });
     return foundPost;
   } catch (error) {
-    // Error cua model thuong la loi he thong ko can bat error qua khắc khe
     throw new Error(error);
   }
 };
@@ -193,6 +193,14 @@ const updatePostComment = async (id, body) => {
   }
 };
 
+const updateLikes = async (postId, updatedLikes) => {
+  return await GET_DB().collection(POST_COLLECTION_NAME).updateOne(
+    { _id: new ObjectId(postId) },
+    { $set: { likes: updatedLikes } }
+  );
+};
+
+
 export const postModel = {
   POST_COLLECTION_NAME,
   POST_COLLECTION_SCHEMA,
@@ -205,4 +213,5 @@ export const postModel = {
   findAllPostInStorage,
   getPostByUserIdAndPublic,
   updatePostComment,
+  updateLikes
 };

@@ -17,5 +17,6 @@ Router.route("/:id")
   .put(postController.updatePost);
 
 Router.route("/user/:id").get(postController.getAllPostOfUserAndPublic);
+Router.patch("/like/:id", postController.toggleLikePost);
 
 export const postRoutes = Router;

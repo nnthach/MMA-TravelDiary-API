@@ -109,6 +109,25 @@ const getAllPostOfUserAndPublic = async (req, res, next) => {
     next(error);
   }
 };
+const toggleLikePost = async (req, res, next) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.body.userId;
+
+    if (!postId || !userId) {
+      return res.status(400).json({ message: "Thiếu postId hoặc userId" });
+    }
+
+    const updatedPost = await postService.toggleLikePost(postId, userId);
+
+    res.status(200).json({ likes: updatedPost.likes });
+  } catch (error) {
+    console.error("Lỗi toggleLikePost:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+
 
 export const postController = {
   createPost,
@@ -118,4 +137,5 @@ export const postController = {
   deletePost,
   postDetail,
   getAllPostOfUserAndPublic,
+  toggleLikePost 
 };

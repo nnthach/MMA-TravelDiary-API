@@ -110,6 +110,21 @@ const getAllPostOfUserAndPublic = async (id, query) => {
     throw error;
   }
 };
+const toggleLikePost = async (postId, userId) => {
+  const post = await postModel.findPostById(postId);
+  if (!post) throw new Error("Post not found");
+
+  let updatedLikes;
+  if (Array.isArray(post.likes) && post.likes.includes(userId)) {
+    updatedLikes = post.likes.filter(id => id !== userId);
+  } else {
+    updatedLikes = [...(post.likes || []), userId];
+  }
+
+  await postModel.updateLikes(postId, updatedLikes);
+
+  return { likes: updatedLikes };
+};
 
 export const postService = {
   createPost,
@@ -119,4 +134,5 @@ export const postService = {
   deletePost,
   postDetail,
   getAllPostOfUserAndPublic,
+  toggleLikePost
 };
