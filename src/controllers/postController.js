@@ -127,6 +127,14 @@ const toggleLikePost = async (req, res, next) => {
   }
 };
 
+const searchPosts = async (req, res, next) => {
+  try {
+    const result = await postService.searchPosts(req.query);
+    res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 export const postController = {
@@ -137,5 +145,6 @@ export const postController = {
   deletePost,
   postDetail,
   getAllPostOfUserAndPublic,
-  toggleLikePost 
+  toggleLikePost,
+  searchPosts
 };

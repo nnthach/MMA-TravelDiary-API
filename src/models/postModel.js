@@ -51,15 +51,19 @@ const createPost = async (data) => {
 
 const findPostById = async (id) => {
   try {
-    const objectId = typeof id === "string" ? new ObjectId(id) : id;
+    if (!ObjectId.isValid(id)) throw new Error("Invalid post ID");
+
+    const objectId = new ObjectId(id);
     const foundPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
       .findOne({ _id: objectId });
+
     return foundPost;
   } catch (error) {
-    throw new Error(error);
+    throw new Error(error.message || "Something went wrong");
   }
 };
+
 
 const getAllPost = async (filter) => {
   try {
@@ -194,12 +198,38 @@ const updatePostComment = async (id, body) => {
 };
 
 const updateLikes = async (postId, updatedLikes) => {
+  if (!ObjectId.isValid(postId)) throw new Error("Invalid post ID");
+
   return await GET_DB().collection(POST_COLLECTION_NAME).updateOne(
     { _id: new ObjectId(postId) },
     { $set: { likes: updatedLikes } }
   );
 };
 
+
+// postModel.js
+const searchPosts = async (filter, page = 1, limit = 10) => {
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+
+  const posts = await GET_DB()
+    .collection(POST_COLLECTION_NAME)
+    .find(filter)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(parseInt(limit))
+    .toArray();
+
+  const total = await GET_DB()
+    .collection(POST_COLLECTION_NAME)
+    .countDocuments(filter);
+
+  return {
+    total,
+    page: parseInt(page),
+    limit: parseInt(limit),
+    data: posts
+  };
+};
 
 export const postModel = {
   POST_COLLECTION_NAME,
@@ -213,5 +243,6 @@ export const postModel = {
   findAllPostInStorage,
   getPostByUserIdAndPublic,
   updatePostComment,
-  updateLikes
+  updateLikes,
+  searchPosts
 };

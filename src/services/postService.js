@@ -49,6 +49,8 @@ const getAllPost = async (query) => {
 
 const findPostById = async (id) => {
   try {
+    if (!ObjectId.isValid(id)) throw new Error("Invalid post ID");
+
     const objectId = new ObjectId(id);
     const foundPost = await postModel.findPostById(objectId);
     return foundPost;
@@ -111,6 +113,8 @@ const getAllPostOfUserAndPublic = async (id, query) => {
   }
 };
 const toggleLikePost = async (postId, userId) => {
+  if (!ObjectId.isValid(postId)) throw new Error("Invalid post ID");
+
   const post = await postModel.findPostById(postId);
   if (!post) throw new Error("Post not found");
 
@@ -126,6 +130,26 @@ const toggleLikePost = async (postId, userId) => {
   return { likes: updatedLikes };
 };
 
+// postService.js
+const searchPosts = async (query) => {
+  const { keyword, province, district, ward, page = 1, limit = 10 } = query;
+  const filter = { public: true };
+
+  if (keyword && typeof keyword === "string") {
+    const regex = new RegExp(keyword.trim(), "i");
+    filter.$or = [
+      { title: { $regex: regex } },
+      { content: { $regex: regex } },
+      { province: { $regex: regex } },
+      { district: { $regex: regex } },
+      { ward: { $regex: regex } }
+    ];
+  }
+
+  return await postModel.searchPosts(filter, page, limit);
+};
+
+
 export const postService = {
   createPost,
   getAllPost,
@@ -134,5 +158,6 @@ export const postService = {
   deletePost,
   postDetail,
   getAllPostOfUserAndPublic,
-  toggleLikePost
+  toggleLikePost,
+  searchPosts
 };
