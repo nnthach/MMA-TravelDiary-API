@@ -149,6 +149,10 @@ const searchPosts = async (query) => {
   return await postModel.searchPosts(filter, page, limit);
 };
 
+const getRandomPosts = async (limit = 20) => {
+  return await postModel.getRandomPosts(limit);
+};
+
 
 export const postService = {
   createPost,
@@ -159,5 +163,6 @@ export const postService = {
   postDetail,
   getAllPostOfUserAndPublic,
   toggleLikePost,
-  searchPosts
+  searchPosts,
+  getRandomPosts
 };

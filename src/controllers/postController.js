@@ -136,6 +136,15 @@ const searchPosts = async (req, res, next) => {
   }
 };
 
+const getRandomPosts = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const posts = await postService.getRandomPosts(limit);
+    res.status(StatusCodes.OK).json({ data: posts });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const postController = {
   createPost,
@@ -146,5 +155,6 @@ export const postController = {
   postDetail,
   getAllPostOfUserAndPublic,
   toggleLikePost,
-  searchPosts
+  searchPosts,
+  getRandomPosts
 };

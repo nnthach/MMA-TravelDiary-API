@@ -230,6 +230,20 @@ const searchPosts = async (filter, page = 1, limit = 10) => {
     data: posts
   };
 };
+const getRandomPosts = async (limit = 20) => {
+  try {
+    const posts = await GET_DB()
+      .collection(POST_COLLECTION_NAME)
+      .aggregate([
+        { $match: { public: true, isBanned: false } }, // lọc bài hợp lệ
+        { $sample: { size: limit } }
+      ])
+      .toArray();
+    return posts;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
 
 export const postModel = {
   POST_COLLECTION_NAME,
@@ -244,5 +258,6 @@ export const postModel = {
   getPostByUserIdAndPublic,
   updatePostComment,
   updateLikes,
-  searchPosts
+  searchPosts,
+  getRandomPosts
 };

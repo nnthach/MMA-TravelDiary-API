@@ -12,6 +12,8 @@ Router.route("/")
   .post(postValidation.createPost, postController.createPost);
   
 Router.get("/search", postController.searchPosts);
+Router.get("/random", postController.getRandomPosts);
+
 Router.route("/:id")
   .get(postController.findPostById)
   .delete(postController.deletePost)
