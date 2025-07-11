@@ -10,6 +10,7 @@ const Router = express.Router();
 Router.route("/")
   .get(postController.getAllPost)
   .post(postValidation.createPost, postController.createPost);
+  
 Router.get("/search", postController.searchPosts);
 Router.route("/:id")
   .get(postController.findPostById)

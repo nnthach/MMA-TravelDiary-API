@@ -131,6 +131,20 @@ const getById = async (id) => {
 };
 const update = async (id, data) => {
   try {
+    if (data.email) {
+      const isAvailableEmail = await userModel.findUserByFilter({
+        email: data.email,
+      });
+      console.log("isAvailableEmail", isAvailableEmail);
+
+      if (isAvailableEmail) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          "This email is already in use"
+        );
+      }
+    }
+
     return await userModel.updateUserById(id, data);
   } catch (error) {
     throw error;

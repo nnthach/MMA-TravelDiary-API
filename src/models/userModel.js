@@ -33,6 +33,7 @@ const USER_COLLECTION_SCHEMA = Joi.object({
     }),
   role: Joi.string().default("User"),
   refreshToken: Joi.string().default(""),
+  avatar: Joi.string().default(""),
   otp: Joi.string().default(""),
   otpExpire: Joi.date().default(null),
   createdAt: Joi.date().default(() => new Date()),
@@ -45,6 +46,7 @@ const USER_UPDATE_SCHEMA = Joi.object({
   email: Joi.string().email().optional(),
   role: Joi.string(),
   password: Joi.string().min(6).max(20).optional(),
+  avatar: Joi.string().allow(null),
   otp: Joi.string().allow(null),
   otpExpire: Joi.date().allow(null),
   updatedAt: Joi.date().default(() => new Date()),
@@ -54,12 +56,16 @@ const USER_UPDATE_SCHEMA = Joi.object({
 const validateBeforeCreate = async (data) => {
   return await USER_COLLECTION_SCHEMA.validateAsync(data, {
     abortEarly: false,
+    allowUnknown: true,
   });
 };
 
 // Validate dữ liệu trước khi update
 const validateBeforeUpdate = async (data) => {
-  return await USER_UPDATE_SCHEMA.validateAsync(data, { abortEarly: false });
+  return await USER_UPDATE_SCHEMA.validateAsync(data, {
+    abortEarly: false,
+    allowUnknown: true,
+  });
 };
 
 // Register user
