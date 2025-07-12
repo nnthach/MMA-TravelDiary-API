@@ -12,7 +12,14 @@ const createPost = async (req, res, next) => {
       "string.min": "Title must be at least 6 characters long.",
     }),
     content: Joi.string().max(1000).required().strict(),
-    images: Joi.array().items(Joi.string()).default([]),
+    images: Joi.array()
+      .items(
+        Joi.object({
+          uri: Joi.string().uri(),
+          type: Joi.string().valid("image", "video"),
+        })
+      )
+      .default([]),
   });
 
   try {

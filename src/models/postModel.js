@@ -3,6 +3,7 @@
 import Joi from "joi";
 import { GET_DB } from "~/config/mongodb";
 import { ObjectId } from "mongodb";
+import { userModel } from "~/models/userModel";
 
 const POST_COLLECTION_NAME = "posts";
 // Define the schema for the user collection
@@ -11,7 +12,14 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   username: Joi.string().required(),
   title: Joi.string().min(6).max(50).required(),
   content: Joi.string().max(1000).required().strict(),
-  images: Joi.array().items(Joi.string()).default([]),
+  images: Joi.array()
+    .items(
+      Joi.object({
+        uri: Joi.string().uri(),
+        type: Joi.string().valid("image", "video"),
+      })
+    )
+    .default([]),
   slug: Joi.string().optional(),
   province: Joi.string().default(""),
   district: Joi.string().default(""),
@@ -22,7 +30,7 @@ const POST_COLLECTION_SCHEMA = Joi.object({
   comments: Joi.array().items(Joi.object().unknown(true)).default([]),
   createdAt: Joi.date().timestamp("javascript").default(Date.now()),
   updatedAt: Joi.date().timestamp("javascript").default(null),
-    likes: Joi.array().items(Joi.string()).default([])
+  likes: Joi.array().items(Joi.string()).default([]),
 });
 
 // Validate data before creating a new user
@@ -37,6 +45,9 @@ const createPost = async (data) => {
   console.log("data create", data);
   try {
     const validData = await validateBeforeCreate(data);
+
+    // convert to objectid
+    validData.userId = new ObjectId(validData.userId);
 
     const createdPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
@@ -56,22 +67,78 @@ const findPostById = async (id) => {
     const objectId = new ObjectId(id);
     const foundPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .findOne({ _id: objectId });
+      .aggregate([
+        { $match: { _id: objectId } },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME,
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            avatar: "$userInfo.avatar",
+          },
+        },
+        {
+          $project: {
+            userInfo: 0, // ẩn nếu không cần
+          },
+        },
+      ])
+      .toArray();
 
-    return foundPost;
+    console.log("found post detail", foundPost);
+
+    return foundPost[0];
   } catch (error) {
     throw new Error(error.message || "Something went wrong");
   }
 };
-
 
 const getAllPost = async (filter) => {
   try {
     console.log("filer in model", filter);
     const getAllPost = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .find(filter)
+      .aggregate([
+        { $match: filter },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME, // tên collection user
+            localField: "userId",
+            foreignField: "_id", // nếu userId là ObjectId, cần chuyển
+            as: "userInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            avatar: "$userInfo.avatar",
+          },
+        },
+        {
+          $project: {
+            userInfo: 0, // ẩn userInfo nếu không cần
+          },
+        },
+      ])
       .toArray();
+
+    console.log("get all post", getAllPost);
 
     return getAllPost;
   } catch (error) {
@@ -85,6 +152,7 @@ const updatePost = async (id, updateData) => {
   try {
     const newUpdateData = {
       ...updateData,
+      userId: new ObjectId(updateData.userId),
       updatedAt: new Date(),
     };
 
@@ -200,12 +268,13 @@ const updatePostComment = async (id, body) => {
 const updateLikes = async (postId, updatedLikes) => {
   if (!ObjectId.isValid(postId)) throw new Error("Invalid post ID");
 
-  return await GET_DB().collection(POST_COLLECTION_NAME).updateOne(
-    { _id: new ObjectId(postId) },
-    { $set: { likes: updatedLikes } }
-  );
+  return await GET_DB()
+    .collection(POST_COLLECTION_NAME)
+    .updateOne(
+      { _id: new ObjectId(postId) },
+      { $set: { likes: updatedLikes } }
+    );
 };
-
 
 // postModel.js
 const searchPosts = async (filter, page = 1, limit = 10) => {
@@ -227,7 +296,7 @@ const searchPosts = async (filter, page = 1, limit = 10) => {
     total,
     page: parseInt(page),
     limit: parseInt(limit),
-    data: posts
+    data: posts,
   };
 };
 const getRandomPosts = async (limit = 20) => {

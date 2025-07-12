@@ -96,7 +96,7 @@ const postDetail = async (postId, detail) => {
 
 const getAllPostOfUserAndPublic = async (id, query) => {
   try {
-    const filter = { userId: id };
+    const filter = { userId: new ObjectId(id) };
 
     if (query.public === "true") {
       // find public true
@@ -105,6 +105,8 @@ const getAllPostOfUserAndPublic = async (id, query) => {
       // find public false
       filter.public = false;
     } // do not find public
+
+    console.log("filter g", filter);
 
     const getAllPostOfUser = await postModel.getPostByUserIdAndPublic(filter);
     return getAllPostOfUser;
@@ -120,7 +122,7 @@ const toggleLikePost = async (postId, userId) => {
 
   let updatedLikes;
   if (Array.isArray(post.likes) && post.likes.includes(userId)) {
-    updatedLikes = post.likes.filter(id => id !== userId);
+    updatedLikes = post.likes.filter((id) => id !== userId);
   } else {
     updatedLikes = [...(post.likes || []), userId];
   }
@@ -142,7 +144,7 @@ const searchPosts = async (query) => {
       { content: { $regex: regex } },
       { province: { $regex: regex } },
       { district: { $regex: regex } },
-      { ward: { $regex: regex } }
+      { ward: { $regex: regex } },
     ];
   }
 
