@@ -116,6 +116,18 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+const resendOTP = async (req, res, next) => {
+  try {
+    console.log("email resend otp", req.body.email);
+    const resendOTP = await userService.resendOTP(req.body.email);
+
+    res.status(StatusCodes.OK).json({ message: "Check your email..." });
+  } catch (error) {
+    console.log("error resendOTP", error);
+    next(error);
+  }
+};
+
 export const userController = {
   getListUsers,
   registerUser,
@@ -126,4 +138,5 @@ export const userController = {
   refreshToken,
   forgotPassword,
   resetPassword,
+  resendOTP,
 };

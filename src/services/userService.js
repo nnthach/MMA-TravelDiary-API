@@ -34,7 +34,10 @@ const registerUser = async (reqBody) => {
     // Return the full user data from DB
     return findUser;
   } catch (error) {
-    throw error;
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      error.message || "Fail to register"
+    );
   }
 };
 
@@ -49,14 +52,14 @@ const loginUser = async (reqBody) => {
     const user = await userModel.findUserByFilter(accountData);
     console.log("user login", user);
     if (!user) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Not found user");
     }
 
     // check password
     const isMatchPassword = await bcrypt.compare(password, user.password);
     console.log("is match password", isMatchPassword);
     if (!isMatchPassword) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Not found user");
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Not found user");
     }
 
     // All correct
@@ -68,7 +71,10 @@ const loginUser = async (reqBody) => {
       return loginUser;
     }
   } catch (error) {
-    throw new ApiError(StatusCodes.UNAUTHORIZED, "Fail to login");
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      error.message || "Fail to login"
+    );
   }
 };
 
@@ -129,6 +135,7 @@ const getById = async (id) => {
     throw error;
   }
 };
+
 const update = async (id, data) => {
   try {
     if (data.email) {
@@ -179,7 +186,7 @@ const forgotPassword = async (email) => {
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
-      secure: false, // true for 465, false for other ports
+      secure: false,
       auth: {
         user: env.EMAIL_APP_NAME,
         pass: env.EMAIL_APP_PASSWORD,
@@ -195,7 +202,10 @@ const forgotPassword = async (email) => {
     });
     return info;
   } catch (error) {
-    throw error;
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      error.message || "Fail to send email"
+    );
   }
 };
 
@@ -224,8 +234,15 @@ const resetPassword = async (body) => {
 
     return { message: "Password reset successfully" };
   } catch (error) {
-    throw error;
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      error.message || "Fail to reset password"
+    );
   }
+};
+
+const resendOTP = async (email) => {
+  return await forgotPassword(email);
 };
 
 export const userService = {
@@ -238,4 +255,5 @@ export const userService = {
   listUsers,
   forgotPassword,
   resetPassword,
+  resendOTP,
 };

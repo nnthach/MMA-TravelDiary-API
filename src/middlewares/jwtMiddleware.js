@@ -9,6 +9,7 @@ const white_lists = [
   { method: "POST", path: "/users/login" },
   { method: "POST", path: "/users/forgot-password" },
   { method: "POST", path: "/users/reset-password" },
+  { method: "POST", path: "/users/resend-otp" },
   { method: "GET", path: "/post" },
   { method: "GET", path: "/post/:id" },
 ]; // danh sach cac api ko can token
