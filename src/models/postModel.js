@@ -208,11 +208,41 @@ const postDetail = async (postId, detail) => {
 
 const findAllPostInStorage = async (data) => {
   try {
-    // $in chỉ nhận array ko nhận array object nên phải convert
     const foundPostList = await GET_DB()
       .collection(POST_COLLECTION_NAME)
-      .find({ _id: { $in: data } })
+      .aggregate([
+        {
+          $match: {
+            _id: { $in: data }, // postIds là array ObjectId
+          },
+        },
+        {
+          $lookup: {
+            from: userModel.USER_COLLECTION_NAME,
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$userInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            avatar: "$userInfo.avatar",
+          },
+        },
+        {
+          $project: {
+            userInfo: 0,
+          },
+        },
+      ])
       .toArray();
+    console.log("post sttorage fourn", foundPostList);
 
     return foundPostList;
   } catch (error) {
