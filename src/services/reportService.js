@@ -61,7 +61,7 @@ const updateReport = async (id, body) => {
     throw new Error("Wrong action type");
   }
   try {
-    const getReportDetail = await reportModel.getReportDetail(id);
+    const getReportDetail = await reportModel.getReportDetail(new ObjectId(id));
 
     console.log("get report detail in update service", getReportDetail);
 

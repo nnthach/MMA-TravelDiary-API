@@ -41,6 +41,7 @@ const getReportDetail = async (req, res, next) => {
 const updateReport = async (req, res, next) => {
   try {
     console.log("get report detail controller", req.params.id);
+    console.log("get body report", req.body)
 
     const updateReport = await reportService.updateReport(
       req.params.id,

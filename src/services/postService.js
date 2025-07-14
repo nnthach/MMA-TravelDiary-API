@@ -2,6 +2,8 @@
 import { postModel } from "~/models/postModel";
 import { slugify } from "~/utils/formatters";
 import { ObjectId } from "mongodb";
+import ApiError from "~/utils/ApiError";
+import { StatusCodes } from "http-status-codes";
 
 const createPost = async (reqBody) => {
   console.log("create post body in service", reqBody);
@@ -65,7 +67,10 @@ const updatePost = async (id, updateData) => {
       const post = await postModel.findPostById(new ObjectId(id));
 
       if (post.isBanned) {
-        throw new Error("Your post was banned so cannot public");
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          "Your post was banned so cannot public"
+        );
       }
     }
 
@@ -155,7 +160,6 @@ const getRandomPosts = async (limit = 20) => {
   return await postModel.getRandomPosts(limit);
 };
 
-
 export const postService = {
   createPost,
   getAllPost,
@@ -166,5 +170,5 @@ export const postService = {
   getAllPostOfUserAndPublic,
   toggleLikePost,
   searchPosts,
-  getRandomPosts
+  getRandomPosts,
 };

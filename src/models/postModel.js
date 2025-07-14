@@ -305,7 +305,7 @@ const getRandomPosts = async (limit = 20) => {
       .collection(POST_COLLECTION_NAME)
       .aggregate([
         { $match: { public: true, isBanned: false } }, // lọc bài hợp lệ
-        { $sample: { size: limit } }
+        { $sample: { size: limit } },
       ])
       .toArray();
     return posts;
@@ -328,5 +328,5 @@ export const postModel = {
   updatePostComment,
   updateLikes,
   searchPosts,
-  getRandomPosts
+  getRandomPosts,
 };

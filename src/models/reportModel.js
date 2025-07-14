@@ -28,6 +28,9 @@ const sendReport = async (data) => {
   try {
     const validData = await validateBeforeCreate(data);
 
+    validData.postId = new ObjectId(validData.postId);
+    validData.reporterId = new ObjectId(validData.reporterId);
+
     const sendReport = await GET_DB()
       .collection(REPORT_COLLECTION_NAME)
       .insertOne(validData);
@@ -57,7 +60,7 @@ const getAllReport = async (query = {}) => {
         { $match: query },
         {
           $addFields: {
-            postId: { $toObjectId: "$postId" }, //convert id to object
+            postId: "$postId", //convert id to object
           },
         },
         {
@@ -86,12 +89,12 @@ const getReportDetail = async (id) => {
       .aggregate([
         {
           $match: {
-            _id: new ObjectId(id), // tim theo report id
+            _id: id, // tim theo report id
           },
         },
         {
           $addFields: {
-            postId: { $toObjectId: "$postId" }, //convert id to object
+            postId: "$postId", //convert id to object
           },
         },
         {
@@ -144,7 +147,7 @@ const updateReport = async (id, body) => {
       const updatePost = await GET_DB()
         .collection(postModel.POST_COLLECTION_NAME)
         .updateOne(
-          { _id: new ObjectId(report.postId) },
+          { _id: report.postId },
           {
             $set: {
               isBanned: true,
