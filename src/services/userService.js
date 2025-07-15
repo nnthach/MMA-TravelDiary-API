@@ -152,6 +152,20 @@ const update = async (id, data) => {
       }
     }
 
+    console.log("update data", data);
+    if (data.oldPassword) {
+      const user = await userModel.findUserById(id);
+
+      const isMatchPassword = await bcrypt.compare(
+        data.oldPassword,
+        user.password
+      );
+      console.log("is match password", isMatchPassword);
+      if (!isMatchPassword) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Wrong password");
+      }
+    }
+
     return await userModel.updateUserById(id, data);
   } catch (error) {
     throw error;
